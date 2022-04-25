@@ -1,11 +1,12 @@
 /** @type {import('ts-jest/dist/types').InitialOptionsTsJest} */
 module.exports = {
-  // preset: 'babel-jest',
+  preset: 'ts-jest',
   testEnvironment: 'node',
   collectCoverage: true,
   collectCoverageFrom: ['src/**/*.ts'],
   transform: {
-    "^.+\\.ts?$": "babel-jest"
+    '^.+\\.(ts|tsx)?$': 'ts-jest',
+    "^.+\\.(js|jsx)$": "babel-jest",
   },
   transformIgnorePatterns: ["node_modules"],
   testRegex: 'test',

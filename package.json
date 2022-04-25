@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc -b",
     "prepack": "rm -rf dist && npm build",
@@ -21,6 +22,7 @@
   "devDependencies": {
     "@babel/core": "^7.2.2",
     "@babel/preset-env": "^7.2.3",
+    "@babel/preset-typescript": "^7.16.7",
     "@polkadot/api": "^6",
     "@polkadot/extension-dapp": "^0.42.7",
     "@polkadot/keyring": "^8.4.1",
