@@ -6,11 +6,13 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc -b",
+    "compile": "tsc",
     "prepack": "rm -rf dist && npm build",
     "jest": "jest",
     "test": "npm run prettier && npm run build && npm run jest",
     "codegen": "./node_modules/.bin/subql codegen",
-    "prettier": ""
+    "format": "eslint ./src --ext .ts --fix && prettier --write src/**/*.ts",
+    "formatCheck": "eslint ./src --ext .ts && prettier --check src/**/*.ts"
   },
   "homepage": "https://github.com/subquery/subql-starter",
   "repository": "github:subquery/subql-starter",
@@ -20,27 +22,22 @@
   "author": "Hao",
   "license": "MIT",
   "devDependencies": {
-    "@babel/core": "^7.2.2",
-    "@babel/preset-env": "^7.2.3",
-    "@babel/preset-typescript": "^7.16.7",
     "@polkadot/api": "^6",
     "@polkadot/extension-dapp": "^0.42.7",
     "@polkadot/keyring": "^8.4.1",
     "@polkadot/util-crypto": "^8.4.1",
     "@polkadot/wasm-crypto": "^4.5.1",
-    "@types/jest": "^27.4.1",
     "@types/lodash": "^4.14.179",
-    "babel-core": "^7.0.0-bridge.0",
-    "babel-jest": "^23.6.0",
+    "@typescript-eslint/eslint-plugin": "5.21.0",
+    "@typescript-eslint/parser": "5.21.0",
     "body-parser": "^1.18.3",
+    "eslint": "8.14.0",
+    "eslint-config-prettier": "8.5.0",
     "express": "^4.16.4",
     "graphql": "^16.3.0",
     "graphql-request": "^4.0.0",
-    "jest": "^27.5.1",
     "lodash": "^4.17.21",
     "prettier": "2.6.2",
-    "ts-jest": "^27.1.4",
-    "tslint": "5.11.0",
-    "typescript": "^4.5.4"
+    "typescript": "4.6.3"
   }
 }
