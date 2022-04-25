@@ -20,7 +20,7 @@ export default class Observer {
 
   async getAutomationTimeLastTimeSlot(): Promise<number[]> {
     const polkadotApi = await this.getAPIClient()
-    const resultCodec = await polkadotApi.query.automationTime.lastTimeSlot()
+    const resultCodec = await polkadotApi.query[automationTime].lastTimeSlot()
     return resultCodec.toJSON() as number[]
   }
 
