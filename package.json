@@ -7,8 +7,9 @@
   "scripts": {
     "build": "tsc -b",
     "compile": "tsc",
-    "prepack": "rm -rf dist && npm build",
     "jest": "jest",
+    "prepack": "rm -rf dist && npm build",
+    "prettier": "prettier  --write src/**/*.ts",
     "test": "npm run prettier && npm run build && npm run jest",
     "codegen": "./node_modules/.bin/subql codegen",
     "format": "eslint ./src --ext .ts --fix && prettier --write src/**/*.ts",

@@ -6,6 +6,8 @@ import { ISubmittableResult } from '@polkadot/types/types'
 import { HexString } from '@polkadot/util/types'
 import _ from 'lodash'
 
+const RECURRING_TASKS = 24
+
 export default class Scheduler {
   wsProvider: WsProvider
   api: ApiPromise
@@ -28,14 +30,14 @@ export default class Scheduler {
   }
 
   private async defaultErrorHandler(result: ISubmittableResult): Promise<void> {
-    console.log(`💸  Tx status: ${result.status.type}`)
+    console.log(`Tx status: ${result.status.type}`)
     if (result.status.isFinalized) {
       if (!_.isNil(result.dispatchError)) {
         if (result.dispatchError.isModule) {
           const api = await this.getAPIClient()
-          const metaError = await api.registry.findMetaError(result.dispatchError.asModule)
+          const metaError = api.registry.findMetaError(result.dispatchError.asModule)
           const { docs, name, section } = metaError
-          const dispatchErrorMessage = JSON.stringify({ docs, name, section }, null, 2)
+          const dispatchErrorMessage = JSON.stringify({ docs, name, section })
           console.log('Transaction finalized with error by blockchain', dispatchErrorMessage)
         } else {
           console.log('Transaction finalized with error by blockchain', result.dispatchError.toString())
@@ -78,11 +80,17 @@ export default class Scheduler {
    */
   async sendExtrinsic(
     extrinsic: SubmittableExtrinsic<'promise', ISubmittableResult>,
-    handleDispatch: Function = this.defaultErrorHandler
+    /* eslint-disable  @typescript-eslint/no-explicit-any */
+    handleDispatch: (result: ISubmittableResult) => any
   ): Promise<SubmittableResultSubscription<'promise', ISubmittableResult>> {
-    return extrinsic.send(async (result) => {
-      handleDispatch(result)
+    const extrinsicResult = await extrinsic.send(async (result) => {
+      if (_.isNil(handleDispatch)) {
+        await this.defaultErrorHandler(result)
+      } else {
+        await handleDispatch(result)
+      }
     })
+    return extrinsicResult
   }
 
   /**
@@ -104,7 +112,7 @@ export default class Scheduler {
   ): Promise<HexString> {
     const injector = await web3FromAddress(address)
     const polkadotApi = await this.getAPIClient()
-    const extrinsic = polkadotApi.tx.automationTime.scheduleNotifyTask(providedID, timestamps, message)
+    const extrinsic = polkadotApi.tx['automationTime']['scheduleNotifyTask'](providedID, timestamps, message)
     const nonce = await this.getNonce(address)
     const signedExtrinsic = await extrinsic.signAsync(address, {
       signer: injector.signer,
@@ -134,10 +142,10 @@ export default class Scheduler {
   ): Promise<HexString> {
     const injector = await web3FromAddress(address)
     const polkadotApi = await this.getAPIClient()
-    if (timestamps.length > 24) {
+    if (timestamps.length > RECURRING_TASKS) {
       throw new Error(`Cannot `)
     }
-    const extrinsic = polkadotApi.tx.automationTime.scheduleNativeTransferTask(
+    const extrinsic = polkadotApi.tx['automationTime']['scheduleNativeTransferTask'](
       providedID,
       timestamps,
       receivingAddress,
@@ -160,7 +168,7 @@ export default class Scheduler {
   async buildCancelTaskExtrinsic(address: string, providedID: number): Promise<HexString> {
     const injector = await web3FromAddress(address)
     const polkadotApi = await this.getAPIClient()
-    const extrinsic = polkadotApi.tx.automationTime.cancelTask(providedID)
+    const extrinsic = polkadotApi.tx['automationTime']['cancelTask'](providedID)
     const nonce = await this.getNonce(address)
     const signedExtrinsic = await extrinsic.signAsync(address, {
       signer: injector.signer,

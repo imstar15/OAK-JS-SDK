@@ -20,31 +20,31 @@ export default class Observer {
 
   async getAutomationTimeLastTimeSlot(): Promise<number[]> {
     const polkadotApi = await this.getAPIClient()
-    const resultCodec = await polkadotApi.query[automationTime].lastTimeSlot()
+    const resultCodec = await polkadotApi.query['automationTime']['lastTimeSlot']()
     return resultCodec.toJSON() as number[]
   }
 
   async getAutomationTimeMissedQueue(): Promise<string[]> {
     const polkadotApi = await this.getAPIClient()
-    const resultCodec = await polkadotApi.query.automationTime.missedQueue()
+    const resultCodec = await polkadotApi.query['automationTime']['missedQueue']()
     return resultCodec.toJSON() as string[]
   }
 
   async getAutomationTimeTaskQueue(): Promise<string[]> {
     const polkadotApi = await this.getAPIClient()
-    const resultCodec = await polkadotApi.query.automationTime.taskQueue()
+    const resultCodec = await polkadotApi.query['automationTime']['taskQueue']()
     return resultCodec.toJSON() as string[]
   }
 
   async getAutomationTimeScheduledTasks(inputTime: number): Promise<string[] | null> {
     const polkadotApi = await this.getAPIClient()
-    const resultCodec = await polkadotApi.query.automationTime.scheduledTasks(inputTime)
+    const resultCodec = await polkadotApi.query['automationTime']['scheduledTasks'](inputTime)
     return resultCodec.toJSON() as string[] | null
   }
 
   async getAutomationTimeTasks(taskID: HexString): Promise<AutomationTask> {
     const polkadotApi = await this.getAPIClient()
-    const resultCodec = await polkadotApi.query.automationTime.tasks(taskID)
+    const resultCodec = await polkadotApi.query['automationTime']['tasks'](taskID)
     return resultCodec.toJSON() as unknown as AutomationTask
   }
 }
