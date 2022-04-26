@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const lodash_1 = require("lodash");
+exports.Recurrer = void 0;
+const _ = require("lodash");
 const MS_IN_SEC = 1000;
 const SEC_IN_MIN = 60;
 const MIN_IN_HOUR = 60;
@@ -18,14 +19,14 @@ class Recurrer {
         const startDay = startHour < hourOfDay ? startDate.getUTCDate() : startDate.getUTCDate() + ADDITIONAL_UNIT;
         const firstEventTimestamp = Date.UTC(startYear, startMonth, startDay, hourOfDay);
         const milliSecondsInDay = HOUR_IN_DAY * MIN_IN_HOUR * SEC_IN_MIN * MS_IN_SEC;
-        return lodash_1.default.times(numberRecurring, (index) => {
+        return _.times(numberRecurring, (index) => {
             return firstEventTimestamp + index * milliSecondsInDay;
         });
     }
     getHourlyRecurringTimestamps(startTimestamp, numberRecurring) {
         const secondsInHour = MIN_IN_HOUR * SEC_IN_MIN * MS_IN_SEC;
         const firstEventTimestamp = startTimestamp - (startTimestamp % secondsInHour) + secondsInHour;
-        return lodash_1.default.times(numberRecurring, (index) => {
+        return _.times(numberRecurring, (index) => {
             return firstEventTimestamp + index * secondsInHour;
         });
     }
@@ -55,7 +56,7 @@ class Recurrer {
         const startWeekday = startDate.getDay();
         const startDay = startDate.getUTCDate() + this.findWeekdayStartDate(startWeekday, dayOfWeek, startHour >= hourOfDay);
         const firstEventTimestamp = Date.UTC(startYear, startMonth, startDay, hourOfDay);
-        return lodash_1.default.times(numberRecurring, (index) => {
+        return _.times(numberRecurring, (index) => {
             return firstEventTimestamp + index * secondsInWeek;
         });
     }
@@ -64,7 +65,7 @@ class Recurrer {
         const startYear = startDate.getUTCFullYear();
         const startDay = startDate.getUTCDate();
         const startMonth = startDay < dateOfMonth ? startDate.getUTCMonth() : startDate.getUTCMonth() + ADDITIONAL_UNIT;
-        return lodash_1.default.times(numberRecurring, (index) => {
+        return _.times(numberRecurring, (index) => {
             return Date.UTC(startYear, startMonth + index, dateOfMonth, hourOfDay);
         });
     }
@@ -83,12 +84,12 @@ class Recurrer {
         const inputDay = this.findDayOfWeekInMonthForStartDate(inputYear, inputMonth, dayOfWeek, weekOfMonth);
         const inputMonthEventTimestamp = Date.UTC(inputYear, inputMonth, inputDay, hourOfDay);
         const firstEventMonth = inputMonthEventTimestamp >= inputTimestamp ? inputMonth : inputMonth + ADDITIONAL_UNIT;
-        return lodash_1.default.times(numberRecurring, (index) => {
+        return _.times(numberRecurring, (index) => {
             const newMonth = firstEventMonth + index;
             const newDate = this.findDayOfWeekInMonthForStartDate(inputYear, newMonth, dayOfWeek, weekOfMonth);
             return Date.UTC(inputYear, newMonth, newDate, hourOfDay);
         });
     }
 }
-exports.default = Recurrer;
+exports.Recurrer = Recurrer;
 //# sourceMappingURL=recurrer.js.map

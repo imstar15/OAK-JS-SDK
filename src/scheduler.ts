@@ -8,7 +8,7 @@ import _ from 'lodash'
 
 const RECURRING_TASKS = 24
 
-export default class Scheduler {
+export class Scheduler {
   wsProvider: WsProvider
   api: ApiPromise
 

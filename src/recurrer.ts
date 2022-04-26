@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import * as _ from 'lodash'
 
 const MS_IN_SEC = 1000
 const SEC_IN_MIN = 60
@@ -9,7 +9,7 @@ const ADDITIONAL_UNIT = 1
 const NO_DIFF = 0
 
 // For producing recurring timestamps
-export default class Recurrer {
+export class Recurrer {
   getDailyRecurringTimestamps(
     startTimestamp: number,
     numberRecurring: number,

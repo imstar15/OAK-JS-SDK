@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Scheduler = void 0;
 const api_1 = require("@polkadot/api");
 const extension_dapp_1 = require("@polkadot/extension-dapp");
 const lodash_1 = require("lodash");
@@ -167,5 +168,5 @@ class Scheduler {
         });
     }
 }
-exports.default = Scheduler;
+exports.Scheduler = Scheduler;
 //# sourceMappingURL=scheduler.js.map

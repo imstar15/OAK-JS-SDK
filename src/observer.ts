@@ -1,9 +1,9 @@
 import { WsProvider, ApiPromise } from '@polkadot/api'
 import { HexString } from '@polkadot/util/types'
-import _ from 'lodash'
+import * as _ from 'lodash'
 
 // For observing chain state
-export default class Observer {
+export class Observer {
   wsProvider: WsProvider
   api: ApiPromise
 

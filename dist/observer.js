@@ -9,8 +9,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Observer = void 0;
 const api_1 = require("@polkadot/api");
-const lodash_1 = require("lodash");
+const _ = require("lodash");
 // For observing chain state
 class Observer {
     constructor(websocket) {
@@ -18,7 +19,7 @@ class Observer {
     }
     getAPIClient() {
         return __awaiter(this, void 0, void 0, function* () {
-            if (lodash_1.default.isNil(this.api)) {
+            if (_.isNil(this.api)) {
                 this.api = yield api_1.ApiPromise.create({ provider: this.wsProvider });
             }
             return this.api;
@@ -60,5 +61,5 @@ class Observer {
         });
     }
 }
-exports.default = Observer;
+exports.Observer = Observer;
 //# sourceMappingURL=observer.js.map
