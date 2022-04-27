@@ -1,4 +1,4 @@
-import Observer from '../src/observer'
+import { Observer } from '../src/observer'
 
 // describe('Observer class', () => {
 //   it('getAutomationTimeLastTimeSlot', async () => {

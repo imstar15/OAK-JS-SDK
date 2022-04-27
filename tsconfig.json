@@ -17,6 +17,7 @@
     "skipLibCheck": true,
     "sourceMap": true,
     "target": "es6",
+    "allowJs": true,
    // "declaration": true,
     //"importHelpers": true,
     //"resolveJsonModule": true,

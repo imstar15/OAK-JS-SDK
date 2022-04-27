@@ -10,11 +10,7 @@ const NO_DIFF = 0
 
 // For producing recurring timestamps
 export class Recurrer {
-  getDailyRecurringTimestamps(
-    startTimestamp: number,
-    numberRecurring: number,
-    hourOfDay: HourOfDay
-  ): number[] {
+  getDailyRecurringTimestamps(startTimestamp: number, numberRecurring: number, hourOfDay: HourOfDay): number[] {
     const startDate = new Date(startTimestamp)
     const startHour = startDate.getUTCHours()
     const startYear = startDate.getUTCFullYear()
@@ -93,8 +89,10 @@ export class Recurrer {
     const secondsInWeek = DAYS_IN_WEEK * HOUR_IN_DAY * MIN_IN_HOUR * SEC_IN_MIN * MS_IN_SEC
     const firstDayOfMonth = new Date(Date.UTC(startYear, startMonth))
     const firstDayOfMonthWeekday = firstDayOfMonth.getDay()
-    const dateOfFirstDayOfWeekInMonth = this.findWeekdayStartDate(firstDayOfMonthWeekday, dayOfWeek, false) + ADDITIONAL_UNIT
-    const dateOfMonthTimestamp = Date.UTC(startYear, startMonth, dateOfFirstDayOfWeekInMonth) + secondsInWeek * (weekOfMonth - ADDITIONAL_UNIT)
+    const dateOfFirstDayOfWeekInMonth =
+      this.findWeekdayStartDate(firstDayOfMonthWeekday, dayOfWeek, false) + ADDITIONAL_UNIT
+    const dateOfMonthTimestamp =
+      Date.UTC(startYear, startMonth, dateOfFirstDayOfWeekInMonth) + secondsInWeek * (weekOfMonth - ADDITIONAL_UNIT)
     return new Date(dateOfMonthTimestamp).getDate()
   }
 

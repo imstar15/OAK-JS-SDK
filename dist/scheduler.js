@@ -11,9 +11,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Scheduler = void 0;
 const api_1 = require("@polkadot/api");
-const extension_dapp_1 = require("@polkadot/extension-dapp");
 const lodash_1 = require("lodash");
 const RECURRING_TASKS = 24;
+const LOWEST_TRANSFERRABLE_AMOUNT = 1000000000;
 class Scheduler {
     constructor(websocket) {
         this.wsProvider = new api_1.WsProvider(websocket);
@@ -43,10 +43,12 @@ class Scheduler {
                         const metaError = api.registry.findMetaError(result.dispatchError.asModule);
                         const { docs, name, section } = metaError;
                         const dispatchErrorMessage = JSON.stringify({ docs, name, section });
-                        console.log('Transaction finalized with error by blockchain', dispatchErrorMessage);
+                        const errMsg = `Transaction finalized with error by blockchain ${dispatchErrorMessage}`;
+                        console.log(errMsg);
                     }
                     else {
-                        console.log('Transaction finalized with error by blockchain', result.dispatchError.toString());
+                        const errMsg = `Transaction finalized with error by blockchain ${result.dispatchError.toString()}`;
+                        console.log(errMsg);
                     }
                 }
             }
@@ -76,16 +78,36 @@ class Scheduler {
     //   Return taskIdCodec.toString()
     // }
     /**
+     * validateTimestamps: validates timestamps are:
+     * 1. on the hour
+     * 2. in a future time slot
+     * 3. limited to 24 time slots
+     */
+    validateTimestamps(timestamps) {
+        if (timestamps.length > RECURRING_TASKS)
+            throw new Error(`Recurring Task length cannot exceed 24`);
+        const currentTime = Date.now();
+        const nextAvailableHour = currentTime - (currentTime % 3600) + 3600;
+        lodash_1.default.forEach(timestamps, (timestamp) => {
+            if (timestamp < nextAvailableHour)
+                throw new Error('Scheduled timestamp in the past');
+            if (timestamp % 3600 !== 0)
+                throw new Error('Timestamp is not an hour timestamp');
+        });
+    }
+    /**
      * SendExtrinsic: sends built and signed extrinsic to the chain
      * @param extrinsic
      * @param handleDispatch
      * @returns unsubscribe function
      */
-    sendExtrinsic(extrinsic, 
+    sendExtrinsic(extrinsicHex, 
     /* eslint-disable  @typescript-eslint/no-explicit-any */
     handleDispatch) {
         return __awaiter(this, void 0, void 0, function* () {
-            const extrinsicResult = yield extrinsic.send((result) => __awaiter(this, void 0, void 0, function* () {
+            const polkadotApi = yield this.getAPIClient();
+            const txObject = polkadotApi.tx(extrinsicHex);
+            const unsub = yield txObject.send((result) => __awaiter(this, void 0, void 0, function* () {
                 if (lodash_1.default.isNil(handleDispatch)) {
                     yield this.defaultErrorHandler(result);
                 }
@@ -93,7 +115,8 @@ class Scheduler {
                     yield handleDispatch(result);
                 }
             }));
-            return extrinsicResult;
+            unsub();
+            return txObject.hash.toString();
         });
     }
     /**
@@ -107,14 +130,14 @@ class Scheduler {
      * @param amount
      * @returns extrinsic hex, format: `0x${string}`
      */
-    buildScheduleNotifyExtrinsic(address, providedID, timestamps, message) {
+    buildScheduleNotifyExtrinsic(address, providedID, timestamps, message, signer) {
         return __awaiter(this, void 0, void 0, function* () {
-            const injector = yield (0, extension_dapp_1.web3FromAddress)(address);
+            this.validateTimestamps(timestamps);
             const polkadotApi = yield this.getAPIClient();
             const extrinsic = polkadotApi.tx['automationTime']['scheduleNotifyTask'](providedID, timestamps, message);
             const nonce = yield this.getNonce(address);
             const signedExtrinsic = yield extrinsic.signAsync(address, {
-                signer: injector.signer,
+                signer,
                 nonce,
             });
             return signedExtrinsic.toHex();
@@ -132,17 +155,16 @@ class Scheduler {
      * @param amount
      * @returns extrinsic hex, format: `0x${string}`
      */
-    buildScheduleNativeTransferExtrinsic(address, providedID, timestamps, receivingAddress, amount) {
+    buildScheduleNativeTransferExtrinsic(address, providedID, timestamps, receivingAddress, amount, signer) {
         return __awaiter(this, void 0, void 0, function* () {
-            const injector = yield (0, extension_dapp_1.web3FromAddress)(address);
+            this.validateTimestamps(timestamps);
+            if (amount < LOWEST_TRANSFERRABLE_AMOUNT)
+                throw new Error(`Amount too low`);
             const polkadotApi = yield this.getAPIClient();
-            if (timestamps.length > RECURRING_TASKS) {
-                throw new Error(`Cannot `);
-            }
             const extrinsic = polkadotApi.tx['automationTime']['scheduleNativeTransferTask'](providedID, timestamps, receivingAddress, amount);
             const nonce = yield this.getNonce(address);
             const signedExtrinsic = yield extrinsic.signAsync(address, {
-                signer: injector.signer,
+                signer,
                 nonce,
             });
             return signedExtrinsic.toHex();
@@ -154,14 +176,13 @@ class Scheduler {
      * @param providedID
      * @returns
      */
-    buildCancelTaskExtrinsic(address, providedID) {
+    buildCancelTaskExtrinsic(address, providedID, signer) {
         return __awaiter(this, void 0, void 0, function* () {
-            const injector = yield (0, extension_dapp_1.web3FromAddress)(address);
             const polkadotApi = yield this.getAPIClient();
             const extrinsic = polkadotApi.tx['automationTime']['cancelTask'](providedID);
             const nonce = yield this.getNonce(address);
             const signedExtrinsic = yield extrinsic.signAsync(address, {
-                signer: injector.signer,
+                signer,
                 nonce,
             });
             return signedExtrinsic.toHex();

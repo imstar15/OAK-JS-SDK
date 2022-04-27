@@ -1,12 +1,12 @@
 import { WsProvider, ApiPromise } from '@polkadot/api'
-import { SubmittableExtrinsic, SubmittableResultSubscription } from '@polkadot/api/types'
-import { web3FromAddress } from '@polkadot/extension-dapp'
+import { Signer, SubmittableExtrinsic } from '@polkadot/api/types'
 import { Balance } from '@polkadot/types/interfaces'
 import { ISubmittableResult } from '@polkadot/types/types'
 import { HexString } from '@polkadot/util/types'
 import _ from 'lodash'
 
 const RECURRING_TASKS = 24
+const LOWEST_TRANSFERRABLE_AMOUNT = 1000000000
 
 export class Scheduler {
   wsProvider: WsProvider
@@ -38,9 +38,11 @@ export class Scheduler {
           const metaError = api.registry.findMetaError(result.dispatchError.asModule)
           const { docs, name, section } = metaError
           const dispatchErrorMessage = JSON.stringify({ docs, name, section })
-          console.log('Transaction finalized with error by blockchain', dispatchErrorMessage)
+          const errMsg = `Transaction finalized with error by blockchain ${dispatchErrorMessage}`
+          console.log(errMsg)
         } else {
-          console.log('Transaction finalized with error by blockchain', result.dispatchError.toString())
+          const errMsg = `Transaction finalized with error by blockchain ${result.dispatchError.toString()}`
+          console.log(errMsg)
         }
       }
     }
@@ -73,24 +75,43 @@ export class Scheduler {
   // }
 
   /**
+   * validateTimestamps: validates timestamps are:
+   * 1. on the hour
+   * 2. in a future time slot
+   * 3. limited to 24 time slots
+   */
+  validateTimestamps(timestamps: number[]): void {
+    if (timestamps.length > RECURRING_TASKS) throw new Error(`Recurring Task length cannot exceed 24`)
+    const currentTime = Date.now()
+    const nextAvailableHour = currentTime - (currentTime % 3600) + 3600
+    _.forEach(timestamps, (timestamp) => {
+      if (timestamp < nextAvailableHour) throw new Error('Scheduled timestamp in the past')
+      if (timestamp % 3600 !== 0) throw new Error('Timestamp is not an hour timestamp')
+    })
+  }
+
+  /**
    * SendExtrinsic: sends built and signed extrinsic to the chain
    * @param extrinsic
    * @param handleDispatch
    * @returns unsubscribe function
    */
   async sendExtrinsic(
-    extrinsic: SubmittableExtrinsic<'promise', ISubmittableResult>,
+    extrinsicHex: HexString,
     /* eslint-disable  @typescript-eslint/no-explicit-any */
     handleDispatch: (result: ISubmittableResult) => any
-  ): Promise<SubmittableResultSubscription<'promise', ISubmittableResult>> {
-    const extrinsicResult = await extrinsic.send(async (result) => {
+  ): Promise<string> {
+    const polkadotApi = await this.getAPIClient()
+    const txObject = polkadotApi.tx(extrinsicHex)
+    const unsub = await txObject.send(async (result) => {
       if (_.isNil(handleDispatch)) {
         await this.defaultErrorHandler(result)
       } else {
         await handleDispatch(result)
       }
     })
-    return extrinsicResult
+    unsub()
+    return txObject.hash.toString()
   }
 
   /**
@@ -108,14 +129,15 @@ export class Scheduler {
     address: string,
     providedID: number,
     timestamps: number[],
-    message: string
+    message: string,
+    signer: Signer
   ): Promise<HexString> {
-    const injector = await web3FromAddress(address)
+    this.validateTimestamps(timestamps)
     const polkadotApi = await this.getAPIClient()
     const extrinsic = polkadotApi.tx['automationTime']['scheduleNotifyTask'](providedID, timestamps, message)
     const nonce = await this.getNonce(address)
     const signedExtrinsic = await extrinsic.signAsync(address, {
-      signer: injector.signer,
+      signer,
       nonce,
     })
     return signedExtrinsic.toHex()
@@ -138,13 +160,12 @@ export class Scheduler {
     providedID: string,
     timestamps: number[],
     receivingAddress: string,
-    amount: number
+    amount: number,
+    signer: Signer
   ): Promise<HexString> {
-    const injector = await web3FromAddress(address)
+    this.validateTimestamps(timestamps)
+    if (amount < LOWEST_TRANSFERRABLE_AMOUNT) throw new Error(`Amount too low`)
     const polkadotApi = await this.getAPIClient()
-    if (timestamps.length > RECURRING_TASKS) {
-      throw new Error(`Cannot `)
-    }
     const extrinsic = polkadotApi.tx['automationTime']['scheduleNativeTransferTask'](
       providedID,
       timestamps,
@@ -153,7 +174,7 @@ export class Scheduler {
     )
     const nonce = await this.getNonce(address)
     const signedExtrinsic = await extrinsic.signAsync(address, {
-      signer: injector.signer,
+      signer,
       nonce,
     })
     return signedExtrinsic.toHex()
@@ -165,13 +186,12 @@ export class Scheduler {
    * @param providedID
    * @returns
    */
-  async buildCancelTaskExtrinsic(address: string, providedID: number): Promise<HexString> {
-    const injector = await web3FromAddress(address)
+  async buildCancelTaskExtrinsic(address: string, providedID: number, signer: Signer): Promise<HexString> {
     const polkadotApi = await this.getAPIClient()
     const extrinsic = polkadotApi.tx['automationTime']['cancelTask'](providedID)
     const nonce = await this.getNonce(address)
     const signedExtrinsic = await extrinsic.signAsync(address, {
-      signer: injector.signer,
+      signer,
       nonce,
     })
     return signedExtrinsic.toHex()
