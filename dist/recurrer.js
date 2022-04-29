@@ -72,6 +72,9 @@ class Recurrer {
         return new Date(dateOfMonthTimestamp).getUTCDate();
     }
     getMonthlyRecurringTimestampsByWeekday(inputTimestamp, numberRecurring, hourOfDay, dayOfWeek, weekOfMonth) {
+        if (weekOfMonth > 4) {
+            throw new Error('Can only schedule monthly recurring tasks based on week for the first 4 weeks of a month');
+        }
         const inputDate = new Date(inputTimestamp);
         const inputYear = inputDate.getUTCFullYear();
         const inputMonth = inputDate.getUTCMonth();
