@@ -15,8 +15,8 @@
     "format": "eslint ./src --ext .ts --fix && prettier --write src/**/*.ts",
     "formatCheck": "eslint ./src --ext .ts && prettier --check src/**/*.ts"
   },
-  "homepage": "https://github.com/subquery/subql-starter",
-  "repository": "github:subquery/subql-starter",
+  "homepage": "https://github.com/OAK-Foundation/OAK-JS-SDK",
+  "repository": "https://github.com/OAK-Foundation/OAK-JS-SDK",
   "files": [
     "dist"
   ],
