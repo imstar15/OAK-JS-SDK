@@ -79,3 +79,8 @@ type DateOfMonth =
   | 30
   | 31
 type WeekOfMonth = 1 | 2 | 3 | 4
+
+enum OakChains {
+  NEU = 'NEU',
+  TUR = 'TUR',
+}

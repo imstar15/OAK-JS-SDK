@@ -11,33 +11,47 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Scheduler = void 0;
 const api_1 = require("@polkadot/api");
-const lodash_1 = require("lodash");
-const RECURRING_TASKS = 24;
-const LOWEST_TRANSFERRABLE_AMOUNT = 1000000000;
+const _ = require("lodash");
+const constants_1 = require("./constants");
 class Scheduler {
-    constructor(websocket) {
-        this.wsProvider = new api_1.WsProvider(websocket);
+    constructor(chain) {
+        this.chain = chain;
+        this.wsProvider = new api_1.WsProvider(constants_1.OakChainWebsockets[chain]);
+        this.schedulingTimeLimit = constants_1.OakChainSchedulingLimit[chain];
     }
     getAPIClient() {
         return __awaiter(this, void 0, void 0, function* () {
-            if (lodash_1.default.isNil(this.api)) {
-                this.api = yield api_1.ApiPromise.create({ provider: this.wsProvider });
+            if (_.isNil(this.api)) {
+                this.api = yield api_1.ApiPromise.create({
+                    provider: this.wsProvider,
+                    rpc: {
+                        automationTime: {
+                            generateTaskId: {
+                                description: 'Getting task ID given account ID and provided ID',
+                                params: [
+                                    {
+                                        name: 'accountId',
+                                        type: 'AccountId',
+                                    },
+                                    {
+                                        name: 'providedId',
+                                        type: 'Text',
+                                    },
+                                ],
+                                type: 'Hash',
+                            },
+                        },
+                    },
+                });
             }
             return this.api;
-        });
-    }
-    getNonce(address) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const api = yield this.getAPIClient();
-            const fromNonceCodecIndex = yield api.rpc.system.accountNextIndex(address);
-            return fromNonceCodecIndex.toNumber();
         });
     }
     defaultErrorHandler(result) {
         return __awaiter(this, void 0, void 0, function* () {
             console.log(`Tx status: ${result.status.type}`);
             if (result.status.isFinalized) {
-                if (!lodash_1.default.isNil(result.dispatchError)) {
+                if (!_.isNil(result.dispatchError)) {
                     if (result.dispatchError.isModule) {
                         const api = yield this.getAPIClient();
                         const metaError = api.registry.findMetaError(result.dispatchError.asModule);
@@ -72,11 +86,14 @@ class Scheduler {
      * @param providedID
      * @returns next available task ID
      */
-    // Async getTaskID(address: string, providedID: string): Promise<string> {
-    //   Const polkadotApi = await this.getAPIClient()
-    //   Const taskIdCodec = await polkadotApi.rpc.automationTime.automationTime_generateTaskId(address, providedID);
-    //   Return taskIdCodec.toString()
-    // }
+    getTaskID(address, providedID) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const polkadotApi = yield this.getAPIClient();
+            // TODO: hack until we can merge correct types into polkadotAPI
+            const taskIdCodec = yield polkadotApi.rpc.automationTime.generateTaskId(address, providedID);
+            return taskIdCodec.toString();
+        });
+    }
     /**
      * validateTimestamps: validates timestamps are:
      * 1. on the hour
@@ -84,16 +101,30 @@ class Scheduler {
      * 3. limited to 24 time slots
      */
     validateTimestamps(timestamps) {
-        if (timestamps.length > RECURRING_TASKS)
-            throw new Error(`Recurring Task length cannot exceed 24`);
+        if (timestamps.length > constants_1.RECURRING_TASK_LIMIT)
+            throw new Error(`Recurring Task length cannot exceed ${constants_1.RECURRING_TASK_LIMIT}`);
         const currentTime = Date.now();
-        const nextAvailableHour = currentTime - (currentTime % 3600) + 3600;
-        lodash_1.default.forEach(timestamps, (timestamp) => {
+        const nextAvailableHour = currentTime - (currentTime % (constants_1.SEC_IN_MIN * constants_1.MIN_IN_HOUR * constants_1.MS_IN_SEC)) + constants_1.SEC_IN_MIN * constants_1.MIN_IN_HOUR * constants_1.MS_IN_SEC;
+        _.forEach(timestamps, (timestamp) => {
             if (timestamp < nextAvailableHour)
                 throw new Error('Scheduled timestamp in the past');
-            if (timestamp % 3600 !== 0)
+            if (timestamp % (constants_1.SEC_IN_MIN * constants_1.MIN_IN_HOUR) !== 0)
                 throw new Error('Timestamp is not an hour timestamp');
+            if (timestamp > currentTime + this.schedulingTimeLimit)
+                throw new Error('Timestamp too far in future');
         });
+    }
+    /**
+     * validateTimestamps: validates timestamps are:
+     * 1. on the hour
+     * 2. in a future time slot
+     * 3. limited to 24 time slots
+     */
+    validateTransferParams(amount, sendingAddress, receivingAddress) {
+        if (amount < constants_1.LOWEST_TRANSFERRABLE_AMOUNT)
+            throw new Error(`Amount too low`);
+        if (sendingAddress === receivingAddress)
+            throw new Error(`Cannot send to self`);
     }
     /**
      * SendExtrinsic: sends built and signed extrinsic to the chain
@@ -108,7 +139,7 @@ class Scheduler {
             const polkadotApi = yield this.getAPIClient();
             const txObject = polkadotApi.tx(extrinsicHex);
             const unsub = yield txObject.send((result) => __awaiter(this, void 0, void 0, function* () {
-                if (lodash_1.default.isNil(handleDispatch)) {
+                if (_.isNil(handleDispatch)) {
                     yield this.defaultErrorHandler(result);
                 }
                 else {
@@ -135,10 +166,9 @@ class Scheduler {
             this.validateTimestamps(timestamps);
             const polkadotApi = yield this.getAPIClient();
             const extrinsic = polkadotApi.tx['automationTime']['scheduleNotifyTask'](providedID, timestamps, message);
-            const nonce = yield this.getNonce(address);
             const signedExtrinsic = yield extrinsic.signAsync(address, {
                 signer,
-                nonce,
+                nonce: -1,
             });
             return signedExtrinsic.toHex();
         });
@@ -158,14 +188,12 @@ class Scheduler {
     buildScheduleNativeTransferExtrinsic(address, providedID, timestamps, receivingAddress, amount, signer) {
         return __awaiter(this, void 0, void 0, function* () {
             this.validateTimestamps(timestamps);
-            if (amount < LOWEST_TRANSFERRABLE_AMOUNT)
-                throw new Error(`Amount too low`);
+            this.validateTransferParams(amount, address, receivingAddress);
             const polkadotApi = yield this.getAPIClient();
             const extrinsic = polkadotApi.tx['automationTime']['scheduleNativeTransferTask'](providedID, timestamps, receivingAddress, amount);
-            const nonce = yield this.getNonce(address);
             const signedExtrinsic = yield extrinsic.signAsync(address, {
                 signer,
-                nonce,
+                nonce: -1,
             });
             return signedExtrinsic.toHex();
         });
@@ -180,10 +208,9 @@ class Scheduler {
         return __awaiter(this, void 0, void 0, function* () {
             const polkadotApi = yield this.getAPIClient();
             const extrinsic = polkadotApi.tx['automationTime']['cancelTask'](providedID);
-            const nonce = yield this.getNonce(address);
             const signedExtrinsic = yield extrinsic.signAsync(address, {
                 signer,
-                nonce,
+                nonce: -1,
             });
             return signedExtrinsic.toHex();
         });

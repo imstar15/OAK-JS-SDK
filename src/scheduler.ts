@@ -3,33 +3,58 @@ import { Signer, SubmittableExtrinsic } from '@polkadot/api/types'
 import { Balance } from '@polkadot/types/interfaces'
 import { ISubmittableResult } from '@polkadot/types/types'
 import { HexString } from '@polkadot/util/types'
-import _ from 'lodash'
+import * as _ from 'lodash'
 
-const RECURRING_TASKS = 24
-const LOWEST_TRANSFERRABLE_AMOUNT = 1000000000
+import {
+  LOWEST_TRANSFERRABLE_AMOUNT,
+  MIN_IN_HOUR,
+  MS_IN_SEC,
+  OakChainSchedulingLimit,
+  OakChainWebsockets,
+  RECURRING_TASK_LIMIT,
+  SEC_IN_MIN,
+} from './constants'
 
 export class Scheduler {
   wsProvider: WsProvider
   api: ApiPromise
+  chain: OakChains
+  schedulingTimeLimit: number
 
-  constructor(websocket: string) {
-    this.wsProvider = new WsProvider(websocket)
+  constructor(chain: OakChains) {
+    this.chain = chain
+    this.wsProvider = new WsProvider(OakChainWebsockets[chain])
+    this.schedulingTimeLimit = OakChainSchedulingLimit[chain]
   }
 
   private async getAPIClient(): Promise<ApiPromise> {
     if (_.isNil(this.api)) {
-      this.api = await ApiPromise.create({ provider: this.wsProvider })
+      this.api = await ApiPromise.create({
+        provider: this.wsProvider,
+        rpc: {
+          automationTime: {
+            generateTaskId: {
+              description: 'Getting task ID given account ID and provided ID',
+              params: [
+                {
+                  name: 'accountId',
+                  type: 'AccountId',
+                },
+                {
+                  name: 'providedId',
+                  type: 'Text',
+                },
+              ],
+              type: 'Hash',
+            },
+          },
+        },
+      })
     }
     return this.api
   }
 
-  private async getNonce(address: string): Promise<number> {
-    const api = await this.getAPIClient()
-    const fromNonceCodecIndex = await api.rpc.system.accountNextIndex(address)
-    return fromNonceCodecIndex.toNumber()
-  }
-
-  private async defaultErrorHandler(result: ISubmittableResult): Promise<void> {
+  async defaultErrorHandler(result: ISubmittableResult): Promise<void> {
     console.log(`Tx status: ${result.status.type}`)
     if (result.status.isFinalized) {
       if (!_.isNil(result.dispatchError)) {
@@ -68,11 +93,12 @@ export class Scheduler {
    * @param providedID
    * @returns next available task ID
    */
-  // Async getTaskID(address: string, providedID: string): Promise<string> {
-  //   Const polkadotApi = await this.getAPIClient()
-  //   Const taskIdCodec = await polkadotApi.rpc.automationTime.automationTime_generateTaskId(address, providedID);
-  //   Return taskIdCodec.toString()
-  // }
+  async getTaskID(address: string, providedID: string): Promise<string> {
+    const polkadotApi = await this.getAPIClient()
+    // TODO: hack until we can merge correct types into polkadotAPI
+    const taskIdCodec = await (polkadotApi.rpc as any).automationTime.generateTaskId(address, providedID)
+    return taskIdCodec.toString()
+  }
 
   /**
    * validateTimestamps: validates timestamps are:
@@ -81,13 +107,27 @@ export class Scheduler {
    * 3. limited to 24 time slots
    */
   validateTimestamps(timestamps: number[]): void {
-    if (timestamps.length > RECURRING_TASKS) throw new Error(`Recurring Task length cannot exceed 24`)
+    if (timestamps.length > RECURRING_TASK_LIMIT)
+      throw new Error(`Recurring Task length cannot exceed ${RECURRING_TASK_LIMIT}`)
     const currentTime = Date.now()
-    const nextAvailableHour = currentTime - (currentTime % 3600) + 3600
+    const nextAvailableHour =
+      currentTime - (currentTime % (SEC_IN_MIN * MIN_IN_HOUR * MS_IN_SEC)) + SEC_IN_MIN * MIN_IN_HOUR * MS_IN_SEC
     _.forEach(timestamps, (timestamp) => {
       if (timestamp < nextAvailableHour) throw new Error('Scheduled timestamp in the past')
-      if (timestamp % 3600 !== 0) throw new Error('Timestamp is not an hour timestamp')
+      if (timestamp % (SEC_IN_MIN * MIN_IN_HOUR) !== 0) throw new Error('Timestamp is not an hour timestamp')
+      if (timestamp > currentTime + this.schedulingTimeLimit) throw new Error('Timestamp too far in future')
     })
+  }
+
+  /**
+   * validateTimestamps: validates timestamps are:
+   * 1. on the hour
+   * 2. in a future time slot
+   * 3. limited to 24 time slots
+   */
+  validateTransferParams(amount: number, sendingAddress: string, receivingAddress: string): void {
+    if (amount < LOWEST_TRANSFERRABLE_AMOUNT) throw new Error(`Amount too low`)
+    if (sendingAddress === receivingAddress) throw new Error(`Cannot send to self`)
   }
 
   /**
@@ -135,10 +175,9 @@ export class Scheduler {
     this.validateTimestamps(timestamps)
     const polkadotApi = await this.getAPIClient()
     const extrinsic = polkadotApi.tx['automationTime']['scheduleNotifyTask'](providedID, timestamps, message)
-    const nonce = await this.getNonce(address)
     const signedExtrinsic = await extrinsic.signAsync(address, {
       signer,
-      nonce,
+      nonce: -1,
     })
     return signedExtrinsic.toHex()
   }
@@ -164,7 +203,7 @@ export class Scheduler {
     signer: Signer
   ): Promise<HexString> {
     this.validateTimestamps(timestamps)
-    if (amount < LOWEST_TRANSFERRABLE_AMOUNT) throw new Error(`Amount too low`)
+    this.validateTransferParams(amount, address, receivingAddress)
     const polkadotApi = await this.getAPIClient()
     const extrinsic = polkadotApi.tx['automationTime']['scheduleNativeTransferTask'](
       providedID,
@@ -172,10 +211,9 @@ export class Scheduler {
       receivingAddress,
       amount
     )
-    const nonce = await this.getNonce(address)
     const signedExtrinsic = await extrinsic.signAsync(address, {
       signer,
-      nonce,
+      nonce: -1,
     })
     return signedExtrinsic.toHex()
   }
@@ -189,10 +227,9 @@ export class Scheduler {
   async buildCancelTaskExtrinsic(address: string, providedID: number, signer: Signer): Promise<HexString> {
     const polkadotApi = await this.getAPIClient()
     const extrinsic = polkadotApi.tx['automationTime']['cancelTask'](providedID)
-    const nonce = await this.getNonce(address)
     const signedExtrinsic = await extrinsic.signAsync(address, {
       signer,
-      nonce,
+      nonce: -1,
     })
     return signedExtrinsic.toHex()
   }

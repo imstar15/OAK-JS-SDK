@@ -12,10 +12,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Observer = void 0;
 const api_1 = require("@polkadot/api");
 const _ = require("lodash");
+const constants_1 = require("./constants");
 // For observing chain state
 class Observer {
-    constructor(websocket) {
-        this.wsProvider = new api_1.WsProvider(websocket);
+    constructor(chain) {
+        this.wsProvider = new api_1.WsProvider(constants_1.OakChainWebsockets[chain]);
     }
     getAPIClient() {
         return __awaiter(this, void 0, void 0, function* () {

@@ -31,6 +31,7 @@
     "@polkadot/keyring": "9.0.1",
     "@polkadot/util-crypto": "9.0.1",
     "@polkadot/wasm-crypto": "6.0.1",
+    "@types/jest": "^27.4.1",
     "@types/lodash": "^4.14.179",
     "@typescript-eslint/eslint-plugin": "5.21.0",
     "@typescript-eslint/parser": "5.21.0",

@@ -1,12 +1,5 @@
 import * as _ from 'lodash'
-
-const MS_IN_SEC = 1000
-const SEC_IN_MIN = 60
-const MIN_IN_HOUR = 60
-const HOUR_IN_DAY = 24
-const DAYS_IN_WEEK = 7
-const ADDITIONAL_UNIT = 1
-const NO_DIFF = 0
+import { ADDITIONAL_UNIT, DAYS_IN_WEEK, HOUR_IN_DAY, MIN_IN_HOUR, MS_IN_SEC, NO_DIFF, SEC_IN_MIN } from './constants'
 
 // For producing recurring timestamps
 export class Recurrer {
@@ -57,8 +50,8 @@ export class Recurrer {
     const startHour = startDate.getUTCHours()
     const startYear = startDate.getUTCFullYear()
     const startMonth = startDate.getUTCMonth()
-    const startWeekday = startDate.getDay()
-    const startDay = startDate.getUTCDate() + this.findWeekdayStartDate(startWeekday, dayOfWeek, startHour >= hourOfDay)
+    const startWeekday = startDate.getUTCDay()
+    const startDay = startDate.getUTCDate() + this.findWeekdayStartDate(startWeekday, dayOfWeek, startHour < hourOfDay)
     const firstEventTimestamp = Date.UTC(startYear, startMonth, startDay, hourOfDay)
     return _.times(numberRecurring, (index) => {
       return firstEventTimestamp + index * secondsInWeek
@@ -88,12 +81,12 @@ export class Recurrer {
   ): number {
     const secondsInWeek = DAYS_IN_WEEK * HOUR_IN_DAY * MIN_IN_HOUR * SEC_IN_MIN * MS_IN_SEC
     const firstDayOfMonth = new Date(Date.UTC(startYear, startMonth))
-    const firstDayOfMonthWeekday = firstDayOfMonth.getDay()
+    const firstDayOfMonthWeekday = firstDayOfMonth.getUTCDay()
     const dateOfFirstDayOfWeekInMonth =
       this.findWeekdayStartDate(firstDayOfMonthWeekday, dayOfWeek, false) + ADDITIONAL_UNIT
     const dateOfMonthTimestamp =
       Date.UTC(startYear, startMonth, dateOfFirstDayOfWeekInMonth) + secondsInWeek * (weekOfMonth - ADDITIONAL_UNIT)
-    return new Date(dateOfMonthTimestamp).getDate()
+    return new Date(dateOfMonthTimestamp).getUTCDate()
   }
 
   getMonthlyRecurringTimestampsByWeekday(

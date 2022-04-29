@@ -2,13 +2,15 @@ import { WsProvider, ApiPromise } from '@polkadot/api'
 import { HexString } from '@polkadot/util/types'
 import * as _ from 'lodash'
 
+import { OakChainWebsockets } from './constants'
+
 // For observing chain state
 export class Observer {
   wsProvider: WsProvider
   api: ApiPromise
 
-  constructor(websocket: string) {
-    this.wsProvider = new WsProvider(websocket)
+  constructor(chain: OakChains) {
+    this.wsProvider = new WsProvider(OakChainWebsockets[chain])
   }
 
   private async getAPIClient(): Promise<ApiPromise> {
