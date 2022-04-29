@@ -66,10 +66,10 @@ class Recurrer {
     findDayOfWeekInMonthForStartDate(startYear, startMonth, dayOfWeek, weekOfMonth) {
         const secondsInWeek = constants_1.DAYS_IN_WEEK * constants_1.HOUR_IN_DAY * constants_1.MIN_IN_HOUR * constants_1.SEC_IN_MIN * constants_1.MS_IN_SEC;
         const firstDayOfMonth = new Date(Date.UTC(startYear, startMonth));
-        const firstDayOfMonthWeekday = firstDayOfMonth.getDay();
+        const firstDayOfMonthWeekday = firstDayOfMonth.getUTCDay();
         const dateOfFirstDayOfWeekInMonth = this.findWeekdayStartDate(firstDayOfMonthWeekday, dayOfWeek, false) + constants_1.ADDITIONAL_UNIT;
         const dateOfMonthTimestamp = Date.UTC(startYear, startMonth, dateOfFirstDayOfWeekInMonth) + secondsInWeek * (weekOfMonth - constants_1.ADDITIONAL_UNIT);
-        return new Date(dateOfMonthTimestamp).getDate();
+        return new Date(dateOfMonthTimestamp).getUTCDate();
     }
     getMonthlyRecurringTimestampsByWeekday(inputTimestamp, numberRecurring, hourOfDay, dayOfWeek, weekOfMonth) {
         const inputDate = new Date(inputTimestamp);

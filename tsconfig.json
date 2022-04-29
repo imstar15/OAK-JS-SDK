@@ -17,11 +17,7 @@
     "skipLibCheck": true,
     "sourceMap": true,
     "target": "es6",
-    "allowJs": true,
-   // "declaration": true,
-    //"importHelpers": true,
-    //"resolveJsonModule": true,
-    //"rootDir": "src",
+    "allowJs": true
   },
-  "include": ["src/**/*", "node_modules/@subql/types/dist/global.d.ts"]
+  "include": ["src/**/*"]
 }
