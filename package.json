@@ -8,7 +8,7 @@
     "build": "tsc -b",
     "compile": "tsc",
     "jest": "jest",
-    "prepack": "rm -rf dist && npm build",
+    "prepack": "rm -rf dist && npm run build",
     "prettier": "prettier  --write src/**/*.ts",
     "test": "npm run prettier && npm run build && npm run jest",
     "format": "eslint ./src --ext .ts --fix && prettier --write src/**/*.ts",
