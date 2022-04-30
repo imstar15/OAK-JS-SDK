@@ -21,7 +21,7 @@
   ],
   "author": "Hao",
   "license": "MIT",
-  "devDependencies": {
+  "dependencies": {
     "@babel/core": "^7.17.9",
     "@babel/preset-env": "^7.16.11",
     "@babel/preset-typescript": "^7.16.7",
