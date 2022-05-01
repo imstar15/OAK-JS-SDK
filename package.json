@@ -17,7 +17,8 @@
   "homepage": "https://github.com/OAK-Foundation/OAK-JS-SDK",
   "repository": "https://github.com/OAK-Foundation/OAK-JS-SDK",
   "files": [
-    "dist"
+    "dist",
+    "src"
   ],
   "author": "Hao",
   "license": "MIT",
