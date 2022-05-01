@@ -10,6 +10,8 @@ export class Observer {
   api: ApiPromise
 
   constructor(chain: OakChains) {
+    console.log(_)
+    console.log(_.times)
     console.log(chain)
     console.log(typeof WsProvider)
     console.log(JSON.stringify(WsProvider))
