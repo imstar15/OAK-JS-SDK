@@ -16,6 +16,9 @@ const constants_1 = require("./constants");
 // For observing chain state
 class Observer {
     constructor(chain) {
+        console.log(chain);
+        console.log(typeof api_1.WsProvider);
+        console.log(JSON.stringify(api_1.WsProvider));
         this.wsProvider = new api_1.WsProvider(constants_1.OakChainWebsockets[chain]);
     }
     getAPIClient() {
