@@ -1,48 +1,45 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.Recurrer = void 0;
-const _ = require("lodash");
-const constants_1 = require("./constants");
+import * as _ from 'lodash';
+import { ADDITIONAL_UNIT, DAYS_IN_WEEK, HOUR_IN_DAY, MIN_IN_HOUR, MS_IN_SEC, NO_DIFF, SEC_IN_MIN } from './constants';
 // For producing recurring timestamps
-class Recurrer {
+export class Recurrer {
     getDailyRecurringTimestamps(startTimestamp, numberRecurring, hourOfDay) {
         const startDate = new Date(startTimestamp);
         const startHour = startDate.getUTCHours();
         const startYear = startDate.getUTCFullYear();
         const startMonth = startDate.getUTCMonth();
-        const startDay = startHour < hourOfDay ? startDate.getUTCDate() : startDate.getUTCDate() + constants_1.ADDITIONAL_UNIT;
+        const startDay = startHour < hourOfDay ? startDate.getUTCDate() : startDate.getUTCDate() + ADDITIONAL_UNIT;
         const firstEventTimestamp = Date.UTC(startYear, startMonth, startDay, hourOfDay);
-        const milliSecondsInDay = constants_1.HOUR_IN_DAY * constants_1.MIN_IN_HOUR * constants_1.SEC_IN_MIN * constants_1.MS_IN_SEC;
+        const milliSecondsInDay = HOUR_IN_DAY * MIN_IN_HOUR * SEC_IN_MIN * MS_IN_SEC;
         return _.times(numberRecurring, (index) => {
             return firstEventTimestamp + index * milliSecondsInDay;
         });
     }
     getHourlyRecurringTimestamps(startTimestamp, numberRecurring) {
-        const secondsInHour = constants_1.MIN_IN_HOUR * constants_1.SEC_IN_MIN * constants_1.MS_IN_SEC;
+        const secondsInHour = MIN_IN_HOUR * SEC_IN_MIN * MS_IN_SEC;
         const firstEventTimestamp = startTimestamp - (startTimestamp % secondsInHour) + secondsInHour;
         return _.times(numberRecurring, (index) => {
             return firstEventTimestamp + index * secondsInHour;
         });
     }
     findWeekdayStartDate(startWeekday, dayOfWeek, canStartSameDay) {
-        const isSameDayOfWeek = startWeekday - dayOfWeek === constants_1.NO_DIFF;
+        const isSameDayOfWeek = startWeekday - dayOfWeek === NO_DIFF;
         if (isSameDayOfWeek) {
             if (canStartSameDay) {
-                return constants_1.NO_DIFF;
+                return NO_DIFF;
             }
             else {
-                return constants_1.DAYS_IN_WEEK;
+                return DAYS_IN_WEEK;
             }
         }
         else if (startWeekday > dayOfWeek) {
-            return constants_1.DAYS_IN_WEEK - (startWeekday - dayOfWeek);
+            return DAYS_IN_WEEK - (startWeekday - dayOfWeek);
         }
         else {
             return dayOfWeek - startWeekday;
         }
     }
     getWeeklyRecurringTimestamps(startTimestamp, numberRecurring, hourOfDay, dayOfWeek) {
-        const secondsInWeek = constants_1.DAYS_IN_WEEK * constants_1.HOUR_IN_DAY * constants_1.MIN_IN_HOUR * constants_1.SEC_IN_MIN * constants_1.MS_IN_SEC;
+        const secondsInWeek = DAYS_IN_WEEK * HOUR_IN_DAY * MIN_IN_HOUR * SEC_IN_MIN * MS_IN_SEC;
         const startDate = new Date(startTimestamp);
         const startHour = startDate.getUTCHours();
         const startYear = startDate.getUTCFullYear();
@@ -58,17 +55,17 @@ class Recurrer {
         const startDate = new Date(startTimestamp);
         const startYear = startDate.getUTCFullYear();
         const startDay = startDate.getUTCDate();
-        const startMonth = startDay < dateOfMonth ? startDate.getUTCMonth() : startDate.getUTCMonth() + constants_1.ADDITIONAL_UNIT;
+        const startMonth = startDay < dateOfMonth ? startDate.getUTCMonth() : startDate.getUTCMonth() + ADDITIONAL_UNIT;
         return _.times(numberRecurring, (index) => {
             return Date.UTC(startYear, startMonth + index, dateOfMonth, hourOfDay);
         });
     }
     findDayOfWeekInMonthForStartDate(startYear, startMonth, dayOfWeek, weekOfMonth) {
-        const secondsInWeek = constants_1.DAYS_IN_WEEK * constants_1.HOUR_IN_DAY * constants_1.MIN_IN_HOUR * constants_1.SEC_IN_MIN * constants_1.MS_IN_SEC;
+        const secondsInWeek = DAYS_IN_WEEK * HOUR_IN_DAY * MIN_IN_HOUR * SEC_IN_MIN * MS_IN_SEC;
         const firstDayOfMonth = new Date(Date.UTC(startYear, startMonth));
         const firstDayOfMonthWeekday = firstDayOfMonth.getUTCDay();
-        const dateOfFirstDayOfWeekInMonth = this.findWeekdayStartDate(firstDayOfMonthWeekday, dayOfWeek, false) + constants_1.ADDITIONAL_UNIT;
-        const dateOfMonthTimestamp = Date.UTC(startYear, startMonth, dateOfFirstDayOfWeekInMonth) + secondsInWeek * (weekOfMonth - constants_1.ADDITIONAL_UNIT);
+        const dateOfFirstDayOfWeekInMonth = this.findWeekdayStartDate(firstDayOfMonthWeekday, dayOfWeek, false) + ADDITIONAL_UNIT;
+        const dateOfMonthTimestamp = Date.UTC(startYear, startMonth, dateOfFirstDayOfWeekInMonth) + secondsInWeek * (weekOfMonth - ADDITIONAL_UNIT);
         return new Date(dateOfMonthTimestamp).getUTCDate();
     }
     getMonthlyRecurringTimestampsByWeekday(inputTimestamp, numberRecurring, hourOfDay, dayOfWeek, weekOfMonth) {
@@ -80,7 +77,7 @@ class Recurrer {
         const inputMonth = inputDate.getUTCMonth();
         const inputDay = this.findDayOfWeekInMonthForStartDate(inputYear, inputMonth, dayOfWeek, weekOfMonth);
         const inputMonthEventTimestamp = Date.UTC(inputYear, inputMonth, inputDay, hourOfDay);
-        const firstEventMonth = inputMonthEventTimestamp >= inputTimestamp ? inputMonth : inputMonth + constants_1.ADDITIONAL_UNIT;
+        const firstEventMonth = inputMonthEventTimestamp >= inputTimestamp ? inputMonth : inputMonth + ADDITIONAL_UNIT;
         return _.times(numberRecurring, (index) => {
             const newMonth = firstEventMonth + index;
             const newDate = this.findDayOfWeekInMonthForStartDate(inputYear, newMonth, dayOfWeek, weekOfMonth);
@@ -88,5 +85,4 @@ class Recurrer {
         });
     }
 }
-exports.Recurrer = Recurrer;
 //# sourceMappingURL=recurrer.js.map
