@@ -18,7 +18,7 @@ test('validateTimestamps will error with too many timestamps', async () => {
 
 test('validateTimestamps will error with timestamps in past', async () => {
   const scheduler = new Scheduler(OakChains.NEU)
-  const timestamps = [ 1588100400000 ]
+  const timestamps = [ 1588100400 ]
   expect(() => scheduler.validateTimestamps(timestamps)).toThrowError(`Scheduled timestamp in the past`)
 })
 
