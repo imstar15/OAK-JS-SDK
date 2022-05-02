@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Observer = void 0;
-const api_1 = require("@polkadot/rpc-provider/ws/index.js");
+const api_1 = require("@polkadot/rpc-provider/ws");
 const api_2 = require("@polkadot/api");
 const _ = require("lodash");
 const constants_1 = require("./constants");
