@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Observer = void 0;
-const api_1 = require("@polkadot/api");
+// const api_1 = require("@polkadot/api");
 const _ = require("lodash");
 const constants_1 = require("./constants");
 // For observing chain state
@@ -19,9 +19,9 @@ class Observer {
         console.log(_);
         console.log(_.times);
         console.log(chain);
-        console.log(typeof api_1.WsProvider);
-        console.log(JSON.stringify(api_1.WsProvider));
-        this.wsProvider = new api_1.WsProvider(constants_1.OakChainWebsockets[chain]);
+        // console.log(typeof api_1.WsProvider);
+        // console.log(JSON.stringify(api_1.WsProvider));
+        // this.wsProvider = new api_1.WsProvider(constants_1.OakChainWebsockets[chain]);
     }
     getAPIClient() {
         return __awaiter(this, void 0, void 0, function* () {
