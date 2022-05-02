@@ -20,8 +20,8 @@ class Observer {
         console.log(_);
         console.log(_.times);
         console.log(chain);
-        console.log(typeof api_1.WsProvider);
-        console.log(JSON.stringify(api_1.WsProvider));
+        console.log(typeof api_1);
+        console.log(JSON.stringify(api_1));
         this.wsProvider = new api_1.WsProvider(constants_1.OakChainWebsockets[chain]);
     }
     getAPIClient() {
