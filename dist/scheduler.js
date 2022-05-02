@@ -45,7 +45,7 @@ export class Scheduler {
         });
     }
     convertToSeconds(startTimestamps) {
-        return _.map(startTimestamps, startTimestamp => {
+        return _.map(startTimestamps, (startTimestamp) => {
             const isMillisecond = startTimestamp > 100000000000;
             if (isMillisecond)
                 return startTimestamp / MS_IN_SEC;
@@ -109,7 +109,8 @@ export class Scheduler {
         if (timestamps.length > RECURRING_TASK_LIMIT)
             throw new Error(`Recurring Task length cannot exceed ${RECURRING_TASK_LIMIT}`);
         const currentTime = Date.now();
-        const nextAvailableHour = (currentTime - (currentTime % (SEC_IN_MIN * MIN_IN_HOUR * MS_IN_SEC)) + SEC_IN_MIN * MIN_IN_HOUR * MS_IN_SEC) / 1000;
+        const nextAvailableHour = (currentTime - (currentTime % (SEC_IN_MIN * MIN_IN_HOUR * MS_IN_SEC)) + SEC_IN_MIN * MIN_IN_HOUR * MS_IN_SEC) /
+            1000;
         _.forEach(timestamps, (timestamp) => {
             if (timestamp < nextAvailableHour)
                 throw new Error('Scheduled timestamp in the past');
@@ -145,11 +146,9 @@ export class Scheduler {
             const txObject = polkadotApi.tx(extrinsicHex);
             const unsub = yield txObject.send((result) => __awaiter(this, void 0, void 0, function* () {
                 if (_.isNil(handleDispatch)) {
-                    console.log(`Using default error handler`);
                     yield this.defaultErrorHandler(result);
                 }
                 else {
-                    console.log(`Using custom error handler`);
                     yield handleDispatch(result);
                 }
             }));

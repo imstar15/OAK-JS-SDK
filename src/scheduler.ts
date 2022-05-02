@@ -55,7 +55,7 @@ export class Scheduler {
   }
 
   private convertToSeconds(startTimestamps: number[]): number[] {
-    return _.map(startTimestamps, startTimestamp => {
+    return _.map(startTimestamps, (startTimestamp) => {
       const isMillisecond = startTimestamp > 100000000000
       if (isMillisecond) return startTimestamp / MS_IN_SEC
       return startTimestamp
@@ -119,7 +119,8 @@ export class Scheduler {
       throw new Error(`Recurring Task length cannot exceed ${RECURRING_TASK_LIMIT}`)
     const currentTime = Date.now()
     const nextAvailableHour =
-      (currentTime - (currentTime % (SEC_IN_MIN * MIN_IN_HOUR * MS_IN_SEC)) + SEC_IN_MIN * MIN_IN_HOUR * MS_IN_SEC) / 1000
+      (currentTime - (currentTime % (SEC_IN_MIN * MIN_IN_HOUR * MS_IN_SEC)) + SEC_IN_MIN * MIN_IN_HOUR * MS_IN_SEC) /
+      1000
     _.forEach(timestamps, (timestamp) => {
       if (timestamp < nextAvailableHour) throw new Error('Scheduled timestamp in the past')
       if (timestamp % (SEC_IN_MIN * MIN_IN_HOUR) !== 0) throw new Error('Timestamp is not an hour timestamp')

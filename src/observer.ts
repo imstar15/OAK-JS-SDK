@@ -31,7 +31,7 @@ export class Observer {
   }
 
   /**
-   * Gets Task hashes in Missed Queue 
+   * Gets Task hashes in Missed Queue
    * @returns 0xstring[]
    */
   async getAutomationTimeMissedQueue(): Promise<string[]> {
@@ -52,7 +52,7 @@ export class Observer {
 
   /**
    * Gets list of Task hashes for a given future time slot
-   * @param inputTime 
+   * @param inputTime
    * @returns 0xstring[]
    */
   async getAutomationTimeScheduledTasks(inputTime: number): Promise<string[] | null> {
@@ -63,7 +63,7 @@ export class Observer {
 
   /**
    * Gets an Automation Task given a task ID
-   * @param taskID 
+   * @param taskID
    * @returns AutomationTask
    */
   async getAutomationTimeTasks(taskID: HexString): Promise<AutomationTask> {

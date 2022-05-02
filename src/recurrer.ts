@@ -6,9 +6,9 @@ export class Recurrer {
   /**
    * Input starting timestamp in milliseconds along with desired hour of day.
    * Output up to 24 daily recurring timestamps in milliseconds
-   * @param startTimestamp 
-   * @param numberRecurring 
-   * @param hourOfDay 
+   * @param startTimestamp
+   * @param numberRecurring
+   * @param hourOfDay
    * @returns daily recurring timestamps
    */
   getDailyRecurringTimestamps(startTimestamp: number, numberRecurring: number, hourOfDay: HourOfDay): number[] {
@@ -27,8 +27,8 @@ export class Recurrer {
   /**
    * Input starting timestamp in milliseconds.
    * Output up to 24 hourly recurring timestamps in milliseconds
-   * @param startTimestamp 
-   * @param numberRecurring 
+   * @param startTimestamp
+   * @param numberRecurring
    * @returns hourly recurring timestamps
    */
   getHourlyRecurringTimestamps(startTimestamp: number, numberRecurring: number): number[] {
@@ -57,10 +57,10 @@ export class Recurrer {
   /**
    * Input starting timestamp in milliseconds along with desired day of week and hour of day.
    * Output up to 24 weekly recurring timestamps in milliseconds
-   * @param startTimestamp 
-   * @param numberRecurring 
-   * @param hourOfDay 
-   * @param dayOfWeek 
+   * @param startTimestamp
+   * @param numberRecurring
+   * @param hourOfDay
+   * @param dayOfWeek
    * @returns weekly recurring timestamps
    */
   getWeeklyRecurringTimestamps(
@@ -85,10 +85,10 @@ export class Recurrer {
   /**
    * Input starting timestamp in milliseconds along with desired date of month and hour of day.
    * Output up to 6 monthly recurring timestamps in milliseconds
-   * @param startTimestamp 
-   * @param numberRecurring 
-   * @param hourOfDay 
-   * @param dateOfMonth 
+   * @param startTimestamp
+   * @param numberRecurring
+   * @param hourOfDay
+   * @param dateOfMonth
    * @returns monthly recurring timestamps
    */
   getMonthlyRecurringTimestampsByDate(
@@ -125,11 +125,11 @@ export class Recurrer {
   /**
    * Input starting timestamp in milliseconds along with desired week of month, day of week and hour of day.
    * Output up to 6 monthly recurring timestamps in milliseconds
-   * @param inputTimestamp 
-   * @param numberRecurring 
-   * @param hourOfDay 
-   * @param dayOfWeek 
-   * @param weekOfMonth 
+   * @param inputTimestamp
+   * @param numberRecurring
+   * @param hourOfDay
+   * @param dayOfWeek
+   * @param weekOfMonth
    * @returns monthly recurring timestamps
    */
   getMonthlyRecurringTimestampsByWeekday(
