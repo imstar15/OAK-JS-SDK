@@ -177,7 +177,7 @@ export class Scheduler {
    */
   async buildScheduleNotifyExtrinsic(
     address: string,
-    providedID: number,
+    providedID: string,
     timestamps: number[],
     message: string,
     signer: Signer

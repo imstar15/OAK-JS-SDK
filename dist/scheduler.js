@@ -2,10 +2,6 @@ import { WsProvider, ApiPromise } from '@polkadot/api';
 import * as _ from 'lodash';
 import { LOWEST_TRANSFERRABLE_AMOUNT, MIN_IN_HOUR, MS_IN_SEC, OakChainSchedulingLimit, OakChainWebsockets, RECURRING_TASK_LIMIT, SEC_IN_MIN, } from './constants';
 export class Scheduler {
-    wsProvider;
-    api;
-    chain;
-    schedulingTimeLimit;
     constructor(chain) {
         this.chain = chain;
         this.wsProvider = new WsProvider(OakChainWebsockets[chain]);

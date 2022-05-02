@@ -5,7 +5,7 @@
     "alwaysStrict": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "module": "esnext",
+    "module": "es2020",
     "moduleResolution": "node",
     "noImplicitAny": true,
     "noImplicitReturns": true,
@@ -16,7 +16,7 @@
     "outDir": "dist",
     "skipLibCheck": true,
     "sourceMap": true,
-    "target": "esnext",
+    "target": "es2020",
     "allowJs": true
   },
   "include": ["src/**/*"]

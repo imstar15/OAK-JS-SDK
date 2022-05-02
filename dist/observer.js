@@ -3,8 +3,6 @@ import * as _ from 'lodash';
 import { OakChainWebsockets } from './constants';
 // For observing chain state
 export class Observer {
-    wsProvider;
-    api;
     constructor(chain) {
         this.wsProvider = new WsProvider(OakChainWebsockets[chain]);
     }
