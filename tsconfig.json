@@ -5,7 +5,7 @@
     "alwaysStrict": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    // "module": "ES2022",
+    "module": "ESNext",
     "moduleResolution": "node",
     "noImplicitAny": true,
     "noImplicitReturns": true,
