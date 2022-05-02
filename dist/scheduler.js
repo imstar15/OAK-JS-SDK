@@ -101,7 +101,7 @@ export class Scheduler {
         if (timestamps.length > RECURRING_TASK_LIMIT)
             throw new Error(`Recurring Task length cannot exceed ${RECURRING_TASK_LIMIT}`);
         const currentTime = Date.now();
-        const nextAvailableHour = currentTime - (currentTime % (SEC_IN_MIN * MIN_IN_HOUR * MS_IN_SEC)) + SEC_IN_MIN * MIN_IN_HOUR * MS_IN_SEC;
+        const nextAvailableHour = (currentTime - (currentTime % (SEC_IN_MIN * MIN_IN_HOUR * MS_IN_SEC)) + SEC_IN_MIN * MIN_IN_HOUR * MS_IN_SEC) / 1000;
         _.forEach(timestamps, (timestamp) => {
             if (timestamp < nextAvailableHour)
                 throw new Error('Scheduled timestamp in the past');
