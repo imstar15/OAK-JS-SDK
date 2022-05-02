@@ -153,10 +153,8 @@ export class Scheduler {
     const txObject = polkadotApi.tx(extrinsicHex)
     const unsub = await txObject.send(async (result) => {
       if (_.isNil(handleDispatch)) {
-        console.log(`Using default error handler`)
         await this.defaultErrorHandler(result)
       } else {
-        console.log(`Using custom error handler`)
         await handleDispatch(result)
       }
     })
