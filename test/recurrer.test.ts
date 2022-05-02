@@ -68,22 +68,6 @@ test('getHourlyRecurringTimestamps', async () => {
   })
 })
 
-test('getMonthlyRecurringTimestampsByDate works', async () => {
-  const numberRecurring = 20
-  const hourOfDay = 23
-  const dateOfMonth = 11
-  const currentTime = Date.now()
-  const recurrer = new Recurrer()
-  const times = recurrer.getMonthlyRecurringTimestampsByDate(currentTime, numberRecurring, hourOfDay, dateOfMonth)
-  expect(times.length).toBe(20)
-  _.forEach(times, (time, index) => {
-    const currentMonth = (new Date(currentTime)).getUTCMonth()
-    const currentYear = (new Date(currentTime)).getUTCFullYear()
-    const newExpectedDate = (Date.UTC(currentYear, currentMonth + index + 1, dateOfMonth, hourOfDay))
-    expect(time).toBe(newExpectedDate)
-  })
-})
-
 test('getMonthlyRecurringTimestampsByDate works when start hour greater than scheduled hour of day', async () => {
   const numberRecurring = 20
   const hourOfDay = 5
@@ -116,12 +100,12 @@ test('getMonthlyRecurringTimestampsByDate works when start hour less than schedu
   })
 })
 
-test('getMonthlyRecurringTimestampsByWeekday works', async () => {
+test('getMonthlyRecurringTimestampsByWeekday works if already past day of current month', async () => {
   const numberRecurring = 20
   const hourOfDay = 23
   const dayOfWeek = 5
-  const weekOfMonth = 3
-  const currentTime = Date.now()
+  const weekOfMonth = 1
+  const currentTime = 1649995200000
   const recurrer = new Recurrer()
   const times = recurrer.getMonthlyRecurringTimestampsByWeekday(currentTime, numberRecurring, hourOfDay, dayOfWeek, weekOfMonth)
   expect(times.length).toBe(20)
@@ -129,6 +113,22 @@ test('getMonthlyRecurringTimestampsByWeekday works', async () => {
     const newTime = new Date(time)
     expect(newTime.getUTCDay()).toBe(dayOfWeek)
     expect(newTime.getUTCMonth()).toBe(((new Date(currentTime)).getUTCMonth() + index + 1) % 12)
+  })
+})
+
+test('getMonthlyRecurringTimestampsByWeekday works if not past day of current month', async () => {
+  const numberRecurring = 20
+  const hourOfDay = 23
+  const dayOfWeek = 5
+  const weekOfMonth = 4
+  const currentTime = 1649995200000
+  const recurrer = new Recurrer()
+  const times = recurrer.getMonthlyRecurringTimestampsByWeekday(currentTime, numberRecurring, hourOfDay, dayOfWeek, weekOfMonth)
+  expect(times.length).toBe(20)
+  _.forEach(times, (time, index) => {
+    const newTime = new Date(time)
+    expect(newTime.getUTCDay()).toBe(dayOfWeek)
+    expect(newTime.getUTCMonth()).toBe(((new Date(currentTime)).getUTCMonth() + index) % 12)
   })
 })
 
