@@ -2,6 +2,14 @@ import * as _ from 'lodash';
 import { ADDITIONAL_UNIT, DAYS_IN_WEEK, HOUR_IN_DAY, MIN_IN_HOUR, MS_IN_SEC, NO_DIFF, SEC_IN_MIN } from './constants';
 // For producing recurring timestamps
 export class Recurrer {
+    /**
+     * Input starting timestamp in milliseconds along with desired hour of day.
+     * Output up to 24 daily recurring timestamps in milliseconds
+     * @param startTimestamp
+     * @param numberRecurring
+     * @param hourOfDay
+     * @returns daily recurring timestamps
+     */
     getDailyRecurringTimestamps(startTimestamp, numberRecurring, hourOfDay) {
         const startDate = new Date(startTimestamp);
         const startHour = startDate.getUTCHours();
@@ -14,6 +22,13 @@ export class Recurrer {
             return firstEventTimestamp + index * milliSecondsInDay;
         });
     }
+    /**
+     * Input starting timestamp in milliseconds.
+     * Output up to 24 hourly recurring timestamps in milliseconds
+     * @param startTimestamp
+     * @param numberRecurring
+     * @returns hourly recurring timestamps
+     */
     getHourlyRecurringTimestamps(startTimestamp, numberRecurring) {
         const secondsInHour = MIN_IN_HOUR * SEC_IN_MIN * MS_IN_SEC;
         const firstEventTimestamp = startTimestamp - (startTimestamp % secondsInHour) + secondsInHour;
@@ -38,6 +53,15 @@ export class Recurrer {
             return dayOfWeek - startWeekday;
         }
     }
+    /**
+     * Input starting timestamp in milliseconds along with desired day of week and hour of day.
+     * Output up to 24 weekly recurring timestamps in milliseconds
+     * @param startTimestamp
+     * @param numberRecurring
+     * @param hourOfDay
+     * @param dayOfWeek
+     * @returns weekly recurring timestamps
+     */
     getWeeklyRecurringTimestamps(startTimestamp, numberRecurring, hourOfDay, dayOfWeek) {
         const secondsInWeek = DAYS_IN_WEEK * HOUR_IN_DAY * MIN_IN_HOUR * SEC_IN_MIN * MS_IN_SEC;
         const startDate = new Date(startTimestamp);
@@ -51,6 +75,15 @@ export class Recurrer {
             return firstEventTimestamp + index * secondsInWeek;
         });
     }
+    /**
+     * Input starting timestamp in milliseconds along with desired date of month and hour of day.
+     * Output up to 6 monthly recurring timestamps in milliseconds
+     * @param startTimestamp
+     * @param numberRecurring
+     * @param hourOfDay
+     * @param dateOfMonth
+     * @returns monthly recurring timestamps
+     */
     getMonthlyRecurringTimestampsByDate(startTimestamp, numberRecurring, hourOfDay, dateOfMonth) {
         const startDate = new Date(startTimestamp);
         const startYear = startDate.getUTCFullYear();
@@ -68,6 +101,16 @@ export class Recurrer {
         const dateOfMonthTimestamp = Date.UTC(startYear, startMonth, dateOfFirstDayOfWeekInMonth) + secondsInWeek * (weekOfMonth - ADDITIONAL_UNIT);
         return new Date(dateOfMonthTimestamp).getUTCDate();
     }
+    /**
+     * Input starting timestamp in milliseconds along with desired week of month, day of week and hour of day.
+     * Output up to 6 monthly recurring timestamps in milliseconds
+     * @param inputTimestamp
+     * @param numberRecurring
+     * @param hourOfDay
+     * @param dayOfWeek
+     * @param weekOfMonth
+     * @returns monthly recurring timestamps
+     */
     getMonthlyRecurringTimestampsByWeekday(inputTimestamp, numberRecurring, hourOfDay, dayOfWeek, weekOfMonth) {
         if (weekOfMonth > 4) {
             throw new Error('Can only schedule monthly recurring tasks based on week for the first 4 weeks of a month');

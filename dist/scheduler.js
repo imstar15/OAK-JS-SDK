@@ -44,6 +44,14 @@ export class Scheduler {
             return this.api;
         });
     }
+    convertToSeconds(startTimestamps) {
+        return _.map(startTimestamps, startTimestamp => {
+            const isMillisecond = startTimestamp > 100000000000;
+            if (isMillisecond)
+                return startTimestamp / MS_IN_SEC;
+            return startTimestamp;
+        });
+    }
     defaultErrorHandler(result) {
         return __awaiter(this, void 0, void 0, function* () {
             console.log(`Tx status: ${result.status.type}`);
@@ -137,9 +145,11 @@ export class Scheduler {
             const txObject = polkadotApi.tx(extrinsicHex);
             const unsub = yield txObject.send((result) => __awaiter(this, void 0, void 0, function* () {
                 if (_.isNil(handleDispatch)) {
+                    console.log(`Using default error handler`);
                     yield this.defaultErrorHandler(result);
                 }
                 else {
+                    console.log(`Using custom error handler`);
                     yield handleDispatch(result);
                 }
             }));
@@ -151,6 +161,7 @@ export class Scheduler {
      * BuildScheduleNotifyExtrinsic: builds and signs a schedule notify task extrinsic via polkadot.js extension
      * Function gets the next available nonce for user.
      * Therefore, will need to wait for transaction finalization before sending another.
+     * Timestamps must be in seconds
      * @param address
      * @param providedID
      * @param timestamp
@@ -161,8 +172,9 @@ export class Scheduler {
     buildScheduleNotifyExtrinsic(address, providedID, timestamps, message, signer) {
         return __awaiter(this, void 0, void 0, function* () {
             this.validateTimestamps(timestamps);
+            const secondTimestamps = this.convertToSeconds(timestamps);
             const polkadotApi = yield this.getAPIClient();
-            const extrinsic = polkadotApi.tx['automationTime']['scheduleNotifyTask'](providedID, timestamps, message);
+            const extrinsic = polkadotApi.tx['automationTime']['scheduleNotifyTask'](providedID, secondTimestamps, message);
             const signedExtrinsic = yield extrinsic.signAsync(address, {
                 signer,
                 nonce: -1,
@@ -186,8 +198,9 @@ export class Scheduler {
         return __awaiter(this, void 0, void 0, function* () {
             this.validateTimestamps(timestamps);
             this.validateTransferParams(amount, address, receivingAddress);
+            const secondTimestamps = this.convertToSeconds(timestamps);
             const polkadotApi = yield this.getAPIClient();
-            const extrinsic = polkadotApi.tx['automationTime']['scheduleNativeTransferTask'](providedID, timestamps, receivingAddress, amount);
+            const extrinsic = polkadotApi.tx['automationTime']['scheduleNativeTransferTask'](providedID, secondTimestamps, receivingAddress, amount);
             const signedExtrinsic = yield extrinsic.signAsync(address, {
                 signer,
                 nonce: -1,

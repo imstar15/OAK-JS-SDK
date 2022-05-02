@@ -54,6 +54,14 @@ export class Scheduler {
     return this.api
   }
 
+  private convertToSeconds(startTimestamps: number[]): number[] {
+    return _.map(startTimestamps, startTimestamp => {
+      const isMillisecond = startTimestamp > 100000000000
+      if (isMillisecond) return startTimestamp / MS_IN_SEC
+      return startTimestamp
+    })
+  }
+
   async defaultErrorHandler(result: ISubmittableResult): Promise<void> {
     console.log(`Tx status: ${result.status.type}`)
     if (result.status.isFinalized) {
@@ -145,8 +153,10 @@ export class Scheduler {
     const txObject = polkadotApi.tx(extrinsicHex)
     const unsub = await txObject.send(async (result) => {
       if (_.isNil(handleDispatch)) {
+        console.log(`Using default error handler`)
         await this.defaultErrorHandler(result)
       } else {
+        console.log(`Using custom error handler`)
         await handleDispatch(result)
       }
     })
@@ -158,6 +168,7 @@ export class Scheduler {
    * BuildScheduleNotifyExtrinsic: builds and signs a schedule notify task extrinsic via polkadot.js extension
    * Function gets the next available nonce for user.
    * Therefore, will need to wait for transaction finalization before sending another.
+   * Timestamps must be in seconds
    * @param address
    * @param providedID
    * @param timestamp
@@ -173,8 +184,9 @@ export class Scheduler {
     signer: Signer
   ): Promise<HexString> {
     this.validateTimestamps(timestamps)
+    const secondTimestamps = this.convertToSeconds(timestamps)
     const polkadotApi = await this.getAPIClient()
-    const extrinsic = polkadotApi.tx['automationTime']['scheduleNotifyTask'](providedID, timestamps, message)
+    const extrinsic = polkadotApi.tx['automationTime']['scheduleNotifyTask'](providedID, secondTimestamps, message)
     const signedExtrinsic = await extrinsic.signAsync(address, {
       signer,
       nonce: -1,
@@ -204,10 +216,11 @@ export class Scheduler {
   ): Promise<HexString> {
     this.validateTimestamps(timestamps)
     this.validateTransferParams(amount, address, receivingAddress)
+    const secondTimestamps = this.convertToSeconds(timestamps)
     const polkadotApi = await this.getAPIClient()
     const extrinsic = polkadotApi.tx['automationTime']['scheduleNativeTransferTask'](
       providedID,
-      timestamps,
+      secondTimestamps,
       receivingAddress,
       amount
     )
