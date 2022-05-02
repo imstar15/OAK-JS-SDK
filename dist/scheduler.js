@@ -1,3 +1,4 @@
+"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -7,19 +8,21 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { WsProvider, ApiPromise } from '@polkadot/api';
-import * as _ from 'lodash';
-import { LOWEST_TRANSFERRABLE_AMOUNT, MIN_IN_HOUR, MS_IN_SEC, OakChainSchedulingLimit, OakChainWebsockets, RECURRING_TASK_LIMIT, SEC_IN_MIN, } from './constants';
-export class Scheduler {
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Scheduler = void 0;
+const api_1 = require("@polkadot/api");
+const _ = require("lodash");
+const constants_1 = require("./constants");
+class Scheduler {
     constructor(chain) {
         this.chain = chain;
-        this.wsProvider = new WsProvider(OakChainWebsockets[chain]);
-        this.schedulingTimeLimit = OakChainSchedulingLimit[chain];
+        this.wsProvider = new api_1.WsProvider(constants_1.OakChainWebsockets[chain]);
+        this.schedulingTimeLimit = constants_1.OakChainSchedulingLimit[chain];
     }
     getAPIClient() {
         return __awaiter(this, void 0, void 0, function* () {
             if (_.isNil(this.api)) {
-                this.api = yield ApiPromise.create({
+                this.api = yield api_1.ApiPromise.create({
                     provider: this.wsProvider,
                     rpc: {
                         automationTime: {
@@ -48,7 +51,7 @@ export class Scheduler {
         return _.map(startTimestamps, (startTimestamp) => {
             const isMillisecond = startTimestamp > 100000000000;
             if (isMillisecond)
-                return startTimestamp / MS_IN_SEC;
+                return startTimestamp / constants_1.MS_IN_SEC;
             return startTimestamp;
         });
     }
@@ -106,15 +109,15 @@ export class Scheduler {
      * 3. limited to 24 time slots
      */
     validateTimestamps(timestamps) {
-        if (timestamps.length > RECURRING_TASK_LIMIT)
-            throw new Error(`Recurring Task length cannot exceed ${RECURRING_TASK_LIMIT}`);
+        if (timestamps.length > constants_1.RECURRING_TASK_LIMIT)
+            throw new Error(`Recurring Task length cannot exceed ${constants_1.RECURRING_TASK_LIMIT}`);
         const currentTime = Date.now();
-        const nextAvailableHour = (currentTime - (currentTime % (SEC_IN_MIN * MIN_IN_HOUR * MS_IN_SEC)) + SEC_IN_MIN * MIN_IN_HOUR * MS_IN_SEC) /
+        const nextAvailableHour = (currentTime - (currentTime % (constants_1.SEC_IN_MIN * constants_1.MIN_IN_HOUR * constants_1.MS_IN_SEC)) + constants_1.SEC_IN_MIN * constants_1.MIN_IN_HOUR * constants_1.MS_IN_SEC) /
             1000;
         _.forEach(timestamps, (timestamp) => {
             if (timestamp < nextAvailableHour)
                 throw new Error('Scheduled timestamp in the past');
-            if (timestamp % (SEC_IN_MIN * MIN_IN_HOUR) !== 0)
+            if (timestamp % (constants_1.SEC_IN_MIN * constants_1.MIN_IN_HOUR) !== 0)
                 throw new Error('Timestamp is not an hour timestamp');
             if (timestamp > currentTime + this.schedulingTimeLimit)
                 throw new Error('Timestamp too far in future');
@@ -127,7 +130,7 @@ export class Scheduler {
      * 3. limited to 24 time slots
      */
     validateTransferParams(amount, sendingAddress, receivingAddress) {
-        if (amount < LOWEST_TRANSFERRABLE_AMOUNT)
+        if (amount < constants_1.LOWEST_TRANSFERRABLE_AMOUNT)
             throw new Error(`Amount too low`);
         if (sendingAddress === receivingAddress)
             throw new Error(`Cannot send to self`);
@@ -225,4 +228,5 @@ export class Scheduler {
         });
     }
 }
+exports.Scheduler = Scheduler;
 //# sourceMappingURL=scheduler.js.map

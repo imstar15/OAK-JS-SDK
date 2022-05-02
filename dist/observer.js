@@ -1,3 +1,4 @@
+"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -7,18 +8,20 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { WsProvider, ApiPromise } from '@polkadot/api';
-import * as _ from 'lodash';
-import { OakChainWebsockets } from './constants';
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Observer = void 0;
+const api_1 = require("@polkadot/api");
+const _ = require("lodash");
+const constants_1 = require("./constants");
 // For observing chain state
-export class Observer {
+class Observer {
     constructor(chain) {
-        this.wsProvider = new WsProvider(OakChainWebsockets[chain]);
+        this.wsProvider = new api_1.WsProvider(constants_1.OakChainWebsockets[chain]);
     }
     getAPIClient() {
         return __awaiter(this, void 0, void 0, function* () {
             if (_.isNil(this.api)) {
-                this.api = yield ApiPromise.create({ provider: this.wsProvider });
+                this.api = yield api_1.ApiPromise.create({ provider: this.wsProvider });
             }
             return this.api;
         });
@@ -81,4 +84,5 @@ export class Observer {
         });
     }
 }
+exports.Observer = Observer;
 //# sourceMappingURL=observer.js.map
