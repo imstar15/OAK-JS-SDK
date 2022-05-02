@@ -73,14 +73,11 @@ export class Recurrer {
             throw new Error('Can only schedule monthly recurring tasks based on week for the first 4 weeks of a month');
         }
         const inputDate = new Date(inputTimestamp);
-        console.log('input date: ', inputDate);
         const inputYear = inputDate.getUTCFullYear();
         const inputMonth = inputDate.getUTCMonth();
         const inputDay = this.findDayOfWeekInMonthForStartDate(inputYear, inputMonth, dayOfWeek, weekOfMonth);
         const inputMonthEventTimestamp = Date.UTC(inputYear, inputMonth, inputDay, hourOfDay);
-        console.log(new Date(inputMonthEventTimestamp));
         const firstEventMonth = inputMonthEventTimestamp >= inputTimestamp ? inputMonth : inputMonth + ADDITIONAL_UNIT;
-        console.log(firstEventMonth);
         return _.times(numberRecurring, (index) => {
             const newMonth = firstEventMonth + index;
             const newDate = this.findDayOfWeekInMonthForStartDate(inputYear, newMonth, dayOfWeek, weekOfMonth);

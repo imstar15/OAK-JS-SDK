@@ -13,11 +13,6 @@ import { OakChainWebsockets } from './constants';
 // For observing chain state
 export class Observer {
     constructor(chain) {
-        console.log(_);
-        console.log(_.times);
-        console.log(chain);
-        console.log(typeof WsProvider);
-        console.log(JSON.stringify(WsProvider));
         this.wsProvider = new WsProvider(OakChainWebsockets[chain]);
     }
     getAPIClient() {
