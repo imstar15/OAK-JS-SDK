@@ -1,10 +1,24 @@
 import * as _ from 'lodash'
 import { ADDITIONAL_UNIT, DAYS_IN_WEEK, HOUR_IN_DAY, MIN_IN_HOUR, MS_IN_SEC, NO_DIFF, SEC_IN_MIN } from './constants'
 
-// For producing recurring timestamps
+/**
+ * Recurring timestamps is a feature that allows for users to schedule regularly
+ * recurring tasks with a single blockchain extrinsic, rather than through multiple
+ * extrinsic calls, as evidenced by the array of timestamps accepted in the Scheduler
+ * class. This is currently only limited to 24 instances. These timstamps do not
+ * have to be evenly spaced. It can be any timestamps in the future, on the hour, and 
+ * limited to up to 24 occurences per extrinsic call. 
+ * 
+ * This utility class will help generate timestamps on more regular cadences:
+ * - Hourly
+ * - Daily
+ * - Weekly
+ * - Monthly by Date
+ * - Monthly by Week of Month and Day of Week
+ */
 export class Recurrer {
   /**
-   * This function finds up to 24 daily recurring timestamps.
+   * getDailyRecurringTimestamps: finds up to 24 daily recurring timestamps.
    * Input any timestamp in milliseconds along with desired hour of day.
    * Function will find next available hourly timestamp based on hour of day and
    * output up to 24 daily recurring timestamps in milliseconds
@@ -29,7 +43,7 @@ export class Recurrer {
   }
 
   /**
-   * This function finds up to 24 hourly recurring timestamps.
+   * getHourlyRecurringTimestamps: finds up to 24 hourly recurring timestamps.
    * Input starting timestamp in milliseconds.
    * Output up to 24 hourly recurring timestamps in milliseconds.
    * If startTimestamp is not on the hour, the first timestamp of the output will be rounded
@@ -62,10 +76,11 @@ export class Recurrer {
   }
 
   /**
-   * Input starting timestamp in milliseconds along with desired day of week and hour of day.
+   * getWeeklyRecurringTimestamps: Input starting timestamp in milliseconds
+   * along with desired day of week and hour of day.
    * Output up to 24 weekly recurring timestamps in milliseconds.
-   * If startTimestamp is not on the correct day of week, the function will find the next
-   * available day where it is the correct day of week.
+   * If startTimestamp is not on the correct day of week, the function will find
+   * the next available day where it is the correct day of week.
    * @param startTimestamp
    * @param numberRecurring
    * @param hourOfDay
@@ -92,10 +107,12 @@ export class Recurrer {
   }
 
   /**
-   * Input starting timestamp in milliseconds along with desired date of month and hour of day.
+   * getMonthlyRecurringTimestampsByDate: Input starting timestamp in milliseconds 
+   * along with desired date of month and hour of day.
    * Output up to 6 monthly recurring timestamps in milliseconds.
    * If startTimestamp does not fit the hourOfDay or dateOfMonth requirements,
-   * the first timestamp of the output will be rounded to the next hour with a valid hour of day on a valid date of the month.
+   * the first timestamp of the output will be rounded to the next hour
+   * with a valid hour of day on a valid date of the month.
    * @param startTimestamp
    * @param numberRecurring
    * @param hourOfDay
@@ -134,7 +151,8 @@ export class Recurrer {
   }
 
   /**
-   * Input starting timestamp in milliseconds along with desired week of month, day of week and hour of day.
+   * getMonthlyRecurringTimestampsByWeekday: Input starting timestamp in milliseconds
+   * along with desired week of month, day of week and hour of day.
    * Output up to 6 monthly recurring timestamps in milliseconds.
    * If startTimestamp does not fit the hourOfDay, dayOfweek and weekOfMonth requirements,
    * the first timestamp of the output will be rounded to the next hour

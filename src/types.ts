@@ -1,7 +1,8 @@
 interface AutomationTask {
   ownerId: string
   providedId: `0x${string}`
-  time: number
+  execution_times: number[],
+  executions_left: number,
   action: AutomationTaskNotifyAction | AutomationTaskTransferAction
 }
 
@@ -17,6 +18,11 @@ interface AutomationTaskTransferAction {
     recipient: string
     amount: number
   }
+}
+
+interface MissedTask {
+  task_id: string,
+  execution_time: number
 }
 
 /*eslint no-magic-numbers: ["off", { "ignore": [0] }]*/

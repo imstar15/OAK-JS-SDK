@@ -4,7 +4,15 @@ import * as _ from 'lodash'
 
 import { OakChainWebsockets } from './constants'
 
-// For observing chain state
+/**
+ * The Observer class is for checking the state of the chain.
+ * Currently, this will give visibility into:
+ * - Last Time Slot
+ * - Missed Task Queue
+ * - Task Queue
+ * - Scheduled Task Map
+ * - Task Map
+ */
 export class Observer {
   wsProvider: WsProvider
   api: ApiPromise
@@ -31,17 +39,21 @@ export class Observer {
   }
 
   /**
-   * Gets Task hashes in Missed Queue
-   * @returns 0xstring[]
+   * Gets Task hashes in Missed Queue. Missed Queue holds tasks that were not able
+   * to be run during their scheduled time slot and will no longer run.
+   * Tasks on the missed queue will be processed and an event will be emitted, marking
+   * completion of the task.
+   * @returns { task_id: 0xstring, execution_time: number }[]
    */
-  async getAutomationTimeMissedQueue(): Promise<string[]> {
+  async getAutomationTimeMissedQueue(): Promise<MissedTask[]> {
     const polkadotApi = await this.getAPIClient()
     const resultCodec = await polkadotApi.query['automationTime']['missedQueue']()
-    return resultCodec.toJSON() as string[]
+    return resultCodec.toJSON() as unknown as MissedTask[]
   }
 
   /**
-   * Gets Task hashes in Task Queue
+   * Gets Task hashes in Task Queue. These are tasks that will be run in a time slot.
+   * Current time slots are only in hours.
    * @returns 0xstring[]
    */
   async getAutomationTimeTaskQueue(): Promise<string[]> {
@@ -51,7 +63,8 @@ export class Observer {
   }
 
   /**
-   * Gets list of Task hashes for a given future time slot
+   * Gets list of Task hashes for a given future time slot. These are the hashes for tasks
+   * scheduled in future time slots, which are defined by the beginning of each hour.
    * @param inputTime
    * @returns 0xstring[]
    */
@@ -62,7 +75,8 @@ export class Observer {
   }
 
   /**
-   * Gets an Automation Task given a task ID
+   * Gets an Automation Task given a task ID. This will have all data and metadata
+   * regarding each task.
    * @param taskID
    * @returns AutomationTask
    */

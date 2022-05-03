@@ -15,6 +15,11 @@ import {
   SEC_IN_MIN,
 } from './constants'
 
+/**
+ * The constructor takes the input to create an API client to connect to the blockchain.
+ * Further commands are performed via this API client in order to reach the blockchain.
+ * @param chain: OakChains
+ */
 export class Scheduler {
   wsProvider: WsProvider
   api: ApiPromise
@@ -27,6 +32,10 @@ export class Scheduler {
     this.schedulingTimeLimit = OakChainSchedulingLimit[chain]
   }
 
+  /**
+   * Creates the API client if one does not already exist
+   * @returns ApiPromise
+   */
   private async getAPIClient(): Promise<ApiPromise> {
     if (_.isNil(this.api)) {
       this.api = await ApiPromise.create({
@@ -54,6 +63,11 @@ export class Scheduler {
     return this.api
   }
 
+  /**
+   * Converts timestamps from milliseconds into seconds for Polkadot API consumption
+   * @param startTimestamps
+   * @returns timestamp[] in seconds
+   */
   private convertToSeconds(startTimestamps: number[]): number[] {
     return _.map(startTimestamps, (startTimestamp) => {
       const isMillisecond = startTimestamp > 100000000000
@@ -62,6 +76,11 @@ export class Scheduler {
     })
   }
 
+  /**
+   * Default error handler for websockets updates for extrinsic
+   * @param result 
+   * @returns null
+   */
   async defaultErrorHandler(result: ISubmittableResult): Promise<void> {
     console.log(`Tx status: ${result.status.type}`)
     if (result.status.isFinalized) {
@@ -82,10 +101,11 @@ export class Scheduler {
   }
 
   /**
-   * GetInclusionFees: gets the fees for inclusion ONLY. This does not include execution fees.
+   * GetInclusionFees: gets the fees for inclusion ONLY.
+   * This does not include execution fees.
    * @param extrinsic
    * @param address
-   * @returns
+   * @returns fee
    */
   async getInclusionFees(
     extrinsic: SubmittableExtrinsic<'promise', ISubmittableResult>,
@@ -96,7 +116,9 @@ export class Scheduler {
   }
 
   /**
-   * GetTaskID: gets the next available Task ID
+   * GetTaskID: gets a txHash for a task.
+   * Wallet Address and Provided ID are required inputs.
+   * TxHash for a task will be returned.
    * @param address
    * @param providedID
    * @returns next available task ID
@@ -109,10 +131,16 @@ export class Scheduler {
   }
 
   /**
-   * validateTimestamps: validates timestamps are:
+   * validateTimestamps: validates timestamps. If not valid, will error.
+   * If valid, nothing is returned. Called in buildScheduleNotifyExtrinsic
+   * and buildScheduleNativeTransferExtrinsic.
+   * 
+   * Timestamps must be:
    * 1. on the hour
-   * 2. in a future time slot
+   * 2. in a future time slot, but within a chain-dependent scheduling limit.
    * 3. limited to 24 time slots
+   * 
+   * @param timestamps 
    */
   validateTimestamps(timestamps: number[]): void {
     if (timestamps.length > RECURRING_TASK_LIMIT)
@@ -129,10 +157,16 @@ export class Scheduler {
   }
 
   /**
-   * validateTimestamps: validates timestamps are:
-   * 1. on the hour
-   * 2. in a future time slot
-   * 3. limited to 24 time slots
+   * validateTransferParams: validates Native Transfer params. If not valid, will error.
+   * If valid, nothing is returned. Called in buildScheduleNativeTransferExtrinsic.
+   * 
+   * Native Transfer Params:
+   * 1. Must send a baseline amount of 1_000_000_000 plancks (0.1 NEU/TUR).
+   * 2. The receiving address must not be the same as that of the sender.
+   * 
+   * @param amount 
+   * @param sendingAddress 
+   * @param receivingAddress 
    */
   validateTransferParams(amount: number, sendingAddress: string, receivingAddress: string): void {
     if (amount < LOWEST_TRANSFERRABLE_AMOUNT) throw new Error(`Amount too low`)
@@ -140,10 +174,13 @@ export class Scheduler {
   }
 
   /**
-   * SendExtrinsic: sends built and signed extrinsic to the chain
+   * SendExtrinsic: sends built and signed extrinsic to the chain.
+   * Accepts pre-built extrinsic hex string. You may provide your own error handler.
+   * If none provided, a default error handler is provided, seen below.
+   * A transaction hash should be returned as a result of the extrinsic.
    * @param extrinsic
    * @param handleDispatch
-   * @returns unsubscribe function
+   * @returns transaction hash
    */
   async sendExtrinsic(
     extrinsicHex: HexString,
@@ -164,10 +201,16 @@ export class Scheduler {
   }
 
   /**
-   * BuildScheduleNotifyExtrinsic: builds and signs a schedule notify task extrinsic via polkadot.js extension
+   * BuildScheduleNotifyExtrinsic: builds and signs a schedule notify task extrinsic.
    * Function gets the next available nonce for user.
    * Therefore, will need to wait for transaction finalization before sending another.
-   * Timestamps must be in seconds
+   * Timestamps are converted into seconds if in milliseconds.
+   * 
+   * Timestamps must be:
+   * 1. on the hour
+   * 2. in a future time slot, but within a chain-dependent scheduling limit.
+   * 3. limited to 24 time slots
+   * 
    * @param address
    * @param providedID
    * @param timestamp
@@ -194,10 +237,22 @@ export class Scheduler {
   }
 
   /**
-   * BuildScheduleNativeTransferExtrinsic: builds and signs a transfer notify task extrinsic via polkadot.js extension.
-   * Function gets the next available nonce for user.
+   * BuildScheduleNativeTransferExtrinsic: builds and signs native transfer task extrinsic.
+   * Function gets the next available nonce for each wallet.
    * Therefore, will need to wait for transaction finalization before sending another.
-   * Timestamps are an 24-item bounded array of unix timestamps
+   * Timestamps is an array of 1-24 unix timestamps, depending on recurrences needed.
+   * ProvidedID needs to be a unique ID per wallet address.
+   * Timestamps are converted into seconds if in milliseconds.
+   * 
+   * Timestamps must be:
+   * 1. on the hour
+   * 2. in a future time slot, but within a chain-dependent scheduling limit.
+   * 3. limited to 24 time slots
+   * 
+   * Native Transfer Params:
+   * 1. Must send a baseline amount of 1_000_000_000 plancks (0.1 NEU/TUR).
+   * 2. The receiving address must not be the same as that of the sender.
+   * 
    * @param address
    * @param providedID
    * @param timestamp
@@ -231,14 +286,15 @@ export class Scheduler {
   }
 
   /**
-   * BuildCancelTaskExtrinsic: builds extrinsic for cancelling a task
+   * BuildCancelTaskExtrinsic: builds extrinsic as a hex string for cancelling a task. 
+   * User must provide txHash for the task and wallet address used to schedule the task.
    * @param address
-   * @param providedID
-   * @returns
+   * @param transactionHash
+   * @returns extrinsic hex, format: `0x${string}`
    */
-  async buildCancelTaskExtrinsic(address: string, providedID: number, signer: Signer): Promise<HexString> {
+  async buildCancelTaskExtrinsic(address: string, transactionHash: string, signer: Signer): Promise<HexString> {
     const polkadotApi = await this.getAPIClient()
-    const extrinsic = polkadotApi.tx['automationTime']['cancelTask'](providedID)
+    const extrinsic = polkadotApi.tx['automationTime']['cancelTask'](transactionHash)
     const signedExtrinsic = await extrinsic.signAsync(address, {
       signer,
       nonce: -1,
