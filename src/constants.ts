@@ -8,9 +8,6 @@ export const NO_DIFF = 0
 export const RECURRING_TASK_LIMIT = 24
 export const LOWEST_TRANSFERRABLE_AMOUNT = 1000000000
 
-export const NEUMANN_WEBSOCKET = 'wss://rpc.testnet.oak.tech'
-export const TURING_WEBSOCKET = 'wss://rpc.turing.oak.tech'
-
 export enum OakChainWebsockets {
   NEU = 'wss://rpc.testnet.oak.tech',
   TUR = 'wss://rpc.turing.oak.tech',
