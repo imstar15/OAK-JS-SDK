@@ -1,0 +1,38 @@
+{
+    "root": true,
+    "env": {
+      "node": true
+    },
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+        "project": "./tsconfig.json"
+    },
+    "plugins": [
+      "@typescript-eslint"
+    ],
+    "extends": [
+      "eslint:recommended",
+      "plugin:@typescript-eslint/recommended",
+      "plugin:@typescript-eslint/recommended-requiring-type-checking",
+      "prettier"
+    ],
+    "rules": {
+        "arrow-body-style": ["error", "always"],
+        "camelcase": "error",
+        "capitalized-comments": ["error", "always"],
+        "curly": "error",
+        "eqeqeq": "error",
+        "no-console": "warn",
+        "no-empty-function": "error",
+        "no-magic-numbers": "warn",
+        "no-return-await": "error",
+        "no-shadow": "error",
+        "no-undefined": "error",
+        "no-unused-expressions": "error",
+        "no-var": "error",
+        "require-await": "error",
+        "@typescript-eslint/no-unsafe-assignment": "off",
+        "@typescript-eslint/no-unsafe-call": "off",
+        "@typescript-eslint/no-unsafe-member-access": "off"
+    }
+}
