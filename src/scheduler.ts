@@ -1,5 +1,5 @@
 import { WsProvider, ApiPromise } from '@polkadot/api'
-import { Signer, SubmittableExtrinsic } from '@polkadot/api/types'
+import { Signer, SubmittableExtrinsic, AddressOrPair } from '@polkadot/api/types'
 import { Balance } from '@polkadot/types/interfaces'
 import { ISubmittableResult } from '@polkadot/types/types'
 import { HexString } from '@polkadot/util/types'
@@ -168,7 +168,7 @@ export class Scheduler {
    * @param sendingAddress 
    * @param receivingAddress 
    */
-  validateTransferParams(amount: number, sendingAddress: string, receivingAddress: string): void {
+  validateTransferParams(amount: number, sendingAddress: AddressOrPair, receivingAddress: string): void {
     if (amount < LOWEST_TRANSFERRABLE_AMOUNT) throw new Error(`Amount too low`)
     if (sendingAddress === receivingAddress) throw new Error(`Cannot send to self`)
   }
@@ -190,13 +190,16 @@ export class Scheduler {
     const polkadotApi = await this.getAPIClient()
     const txObject = polkadotApi.tx(extrinsicHex)
     const unsub = await txObject.send(async (result) => {
+      const { status } = result;
       if (_.isNil(handleDispatch)) {
         await this.defaultErrorHandler(result)
       } else {
         await handleDispatch(result)
       }
+      if (status.isFinalized) {
+        unsub();
+      }
     })
-    unsub()
     return txObject.hash.toString()
   }
 
@@ -261,7 +264,7 @@ export class Scheduler {
    * @returns extrinsic hex, format: `0x${string}`
    */
   async buildScheduleNativeTransferExtrinsic(
-    address: string,
+    address: AddressOrPair,
     providedID: string,
     timestamps: number[],
     receivingAddress: string,
