@@ -1,8 +1,10 @@
 import _ from 'lodash';
-import { WsProvider, ApiPromise } from '@polkadot/api';
-import { OakChains, OakChainWebsockets } from '../src/constants';
+import { WsProvider, ApiPromise, Keyring } from '@polkadot/api';
+import { OakChains, OakChainWebsockets, SS58_PREFIX } from '../src/constants';
 import { Scheduler } from '../src/scheduler';
-import { HexString } from '@polkadot/util/types';
+import type { HexString } from '@polkadot/util/types';
+import type { BlockHash } from '@polkadot/types/interfaces/chain';
+import type { Extrinsic } from '@polkadot/types/interfaces/extrinsics';
 
 export const generateProviderId = () => `functional-test-${new Date().getTime()}-${_.random(0, Number.MAX_SAFE_INTEGER, false)}`;
 
@@ -58,4 +60,18 @@ export const getPolkadotApi = async () : Promise<ApiPromise> => {
     },
   });
   return polkadotApi;
+}
+
+export const getKeyringPair = () => {
+  // Generate sender keyring pair from mnemonic
+  const keyring = new Keyring({ type: 'sr25519', ss58Format: SS58_PREFIX });
+  const keyringPair = keyring.addFromMnemonic(process.env.SENDER_MNEMONIC);
+  return keyringPair;
+}
+
+export const findExtrinsicFromChain = async (polkadotApi: ApiPromise, blockHash: BlockHash, extrinsicHash: String) : Promise<Extrinsic> => {
+  const signedBlock = await polkadotApi.rpc.chain.getBlock(blockHash);
+  const { block: { extrinsics } } = signedBlock;
+  const extrinsic = _.find(extrinsics, (extrinsic) => extrinsic.hash.toHex() === extrinsicHash);
+  return extrinsic;
 }

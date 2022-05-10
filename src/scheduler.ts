@@ -222,11 +222,11 @@ export class Scheduler {
    * @returns extrinsic hex, format: `0x${string}`
    */
   async buildScheduleNotifyExtrinsic(
-    address: string,
+    address: AddressOrPair,
     providedID: string,
     timestamps: number[],
     message: string,
-    signer: Signer
+    signer?: Signer
   ): Promise<HexString> {
     this.validateTimestamps(timestamps)
     const secondTimestamps = this.convertToSeconds(timestamps)
@@ -269,7 +269,7 @@ export class Scheduler {
     timestamps: number[],
     receivingAddress: string,
     amount: number,
-    signer: Signer
+    signer?: Signer
   ): Promise<HexString> {
     this.validateTimestamps(timestamps)
     this.validateTransferParams(amount, address, receivingAddress)
@@ -292,12 +292,12 @@ export class Scheduler {
    * BuildCancelTaskExtrinsic: builds extrinsic as a hex string for cancelling a task. 
    * User must provide txHash for the task and wallet address used to schedule the task.
    * @param address
-   * @param transactionHash
+   * @param taskID
    * @returns extrinsic hex, format: `0x${string}`
    */
-  async buildCancelTaskExtrinsic(address: string, transactionHash: string, signer: Signer): Promise<HexString> {
+  async buildCancelTaskExtrinsic(address: AddressOrPair, taskID: string, signer?: Signer): Promise<HexString> {
     const polkadotApi = await this.getAPIClient()
-    const extrinsic = polkadotApi.tx['automationTime']['cancelTask'](transactionHash)
+    const extrinsic = polkadotApi.tx['automationTime']['cancelTask'](taskID)
     const signedExtrinsic = await extrinsic.signAsync(address, {
       signer,
       nonce: -1,
