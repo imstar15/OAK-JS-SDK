@@ -1,61 +1,55 @@
 import _ from 'lodash';
-import { waitReady } from '@polkadot/wasm-crypto';
-import { hexToAscii, sectionName, sendExtrinsic, findExtrinsicFromChain, getNotifyExtrinsicParams, generateProviderId } from './helpFn';
+import { SECTION_NAME, sendExtrinsic, getNotifyExtrinsicParams, cancelTaskAndVerify, scheduleNotifyTaskAndVerify, getContext, checkBalance } from './helpFn';
 
-beforeEach(async () => {
-	jest.setTimeout(120000);
-  await waitReady();
+beforeEach(() => {
+  jest.setTimeout(120000);
 });
 
 test('scheduler.buildScheduleNotifyExtrinsic works', async () => {
-  const { message, providedID, executionTimestamps, polkadotApi, scheduler, keyringPair } = await getNotifyExtrinsicParams();
+  const { scheduler, observer, keyringPair } = await getContext();
+  await checkBalance(keyringPair);
+  const extrinsicParams = getNotifyExtrinsicParams();
+  const { executionTimestamps } = extrinsicParams;
 
-  // Send notify extrinsic and get extrinsicHash, blockHash.
-  const extrinsicHex = await scheduler.buildScheduleNotifyExtrinsic(keyringPair, providedID, executionTimestamps, message);
-  const { extrinsicHash, blockHash } = await sendExtrinsic(scheduler, extrinsicHex);
+  // schedule notify task and verify
+  const taskID = await scheduleNotifyTaskAndVerify(scheduler, observer, keyringPair, extrinsicParams);
 
-  // Fetch extrinsic from chain
-  const extrinsic = await findExtrinsicFromChain(polkadotApi, blockHash, extrinsicHash);
-
-  //  Verify arguments
-  const { section, method, args } = extrinsic.method;
-  const [providedIdOnChainHex, executionTimestampsOnChain, messageOnChainHex] = args;
-  const providedIdOnChain = hexToAscii(providedIdOnChainHex.toString());
-  const messageOnChain = hexToAscii(messageOnChainHex.toString());
-
-  expect(section).toEqual(sectionName);
-  expect(method).toEqual('scheduleNotifyTask');
-  expect(providedIdOnChain).toEqual(providedID);
-  expect(messageOnChain).toEqual(message);
-  const isTimestampsEqual = _.reduce(executionTimestamps, (prev, executionTimestamp, index) => prev && executionTimestamp === executionTimestampsOnChain[index].toNumber(), true);
-  expect(isTimestampsEqual).toEqual(true);
+  // Cancel task and verify
+  await cancelTaskAndVerify(scheduler, observer, keyringPair, taskID, executionTimestamps[0]);
 });
 
 test('scheduler.buildScheduleNotifyExtrinsic will fail with duplicate providerID', async () => {
-  const { message, providedID, executionTimestamps, scheduler, keyringPair } = await getNotifyExtrinsicParams();
+  const { scheduler, observer, keyringPair } = await getContext();
+  await checkBalance(keyringPair);
+  const extrinsicParams = getNotifyExtrinsicParams();
+  const { providedID,  executionTimestamps, message } = extrinsicParams;
   
-  // Send notify extrinsic and get extrinsicHash, blockHash.
-  const extrinsicHex = await scheduler.buildScheduleNotifyExtrinsic(keyringPair, providedID, executionTimestamps, message);
-  await sendExtrinsic(scheduler, extrinsicHex);
+  // schedule notify task and verify
+  await scheduleNotifyTaskAndVerify(scheduler, observer, keyringPair, extrinsicParams);
 
-  const extrinsicHex2 = await scheduler.buildScheduleNotifyExtrinsic(keyringPair, providedID, executionTimestamps, message);
-  await expect(sendExtrinsic(scheduler, extrinsicHex2)).rejects.toThrow(`${sectionName}.DuplicateTask`);
+  // scheduler.buildScheduleNotifyExtrinsic will fail with duplicate providerID
+  const extrinsicHex = await scheduler.buildScheduleNotifyExtrinsic(keyringPair, providedID, executionTimestamps, message);
+  await expect(sendExtrinsic(scheduler, extrinsicHex)).rejects.toThrow(`${SECTION_NAME}.DuplicateTask`);
 });
 
 test('scheduler.buildScheduleNotifyExtrinsic will fail with empty message', async () => {
-  const { providedID, executionTimestamps, scheduler, keyringPair } = await getNotifyExtrinsicParams();
+  const { scheduler, keyringPair } = await getContext();
+  await checkBalance(keyringPair);
+  const { providedID,  executionTimestamps } = getNotifyExtrinsicParams();
   const message = null;
   
-  // Send notify extrinsic and get extrinsicHash, blockHash.
+  // scheduler.buildScheduleNotifyExtrinsic will fail with empty message
   const extrinsicHex = await scheduler.buildScheduleNotifyExtrinsic(keyringPair, providedID, executionTimestamps, message);
-  await expect(sendExtrinsic(scheduler, extrinsicHex)).rejects.toThrow(`${sectionName}.EmptyMessage`);
+  await expect(sendExtrinsic(scheduler, extrinsicHex)).rejects.toThrow(`${SECTION_NAME}.EmptyMessage`);
 });
 
 test('scheduler.buildScheduleNotifyExtrinsic will fail with empty providedID', async () => {
-  const { message, executionTimestamps, scheduler, keyringPair } = await getNotifyExtrinsicParams();
+  const { scheduler, keyringPair } = await getContext();
+  await checkBalance(keyringPair);
+  const { message, executionTimestamps } = getNotifyExtrinsicParams();
   const providedID = null;
   
-  // Send notify extrinsic and get extrinsicHash, blockHash.
+  // scheduler.buildScheduleNotifyExtrinsic will fail with empty providedID
   const extrinsicHex = await scheduler.buildScheduleNotifyExtrinsic(keyringPair, providedID, executionTimestamps, message);
-  await expect(sendExtrinsic(scheduler, extrinsicHex)).rejects.toThrow(`${sectionName}.EmptyProvidedId`);
+  await expect(sendExtrinsic(scheduler, extrinsicHex)).rejects.toThrow(`${SECTION_NAME}.EmptyProvidedId`);
 });

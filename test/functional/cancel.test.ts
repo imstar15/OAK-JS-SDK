@@ -1,70 +1,60 @@
 import _ from 'lodash';
-import { waitReady } from '@polkadot/wasm-crypto';
-import { sendExtrinsic, getNativeTransferExtrinsicParams, getNotifyExtrinsicParams, cancelTaskAndVerify, getPolkadotApi, getKeyringPair, sectionName } from './helpFn';
-import { Scheduler } from '../../src/scheduler';
-import { OakChains } from '../../src/constants';
+import { sendExtrinsic, getNativeTransferExtrinsicParams, getNotifyExtrinsicParams, cancelTaskAndVerify, SECTION_NAME, checkBalance, getContext, scheduleNotifyTaskAndVerify, scheduleNativeTransferAndVerify } from './helpFn';
 
-beforeEach(async () => {
-	jest.setTimeout(120000);
-  await waitReady();
-});
-
-test('Cancel scheduleNativeTransferExtrinsic works', async () => {
-  const { amount, receiverAddress, providedID, executionTimestamps, polkadotApi, scheduler, keyringPair } = await getNativeTransferExtrinsicParams();
-
-  // Send extrinsic and get extrinsicHash, blockHash.
-  const extrinsicHex = await scheduler.buildScheduleNativeTransferExtrinsic(
-    keyringPair,
-    providedID,
-    executionTimestamps,
-    receiverAddress,
-    amount,
-  );
-  await sendExtrinsic(scheduler, extrinsicHex);
-
-  // Cancel task and verify
-  const taskID = (await scheduler.getTaskID(keyringPair.address, providedID)).toString();
-  await cancelTaskAndVerify(polkadotApi, scheduler, keyringPair, taskID);
-});
-
-test('Cancel scheduleNotifyExtrinsic works', async () => {
-  const { message, providedID, executionTimestamps, polkadotApi, scheduler, keyringPair } = await getNotifyExtrinsicParams();
-
-  // Send notify extrinsic and get extrinsicHash, blockHash.
-  const extrinsicHex = await scheduler.buildScheduleNotifyExtrinsic(keyringPair, providedID, executionTimestamps, message);
-  await sendExtrinsic(scheduler, extrinsicHex);
-
-  // Cancel task and verify
-  const taskID = (await scheduler.getTaskID(keyringPair.address, providedID)).toString();
-  await cancelTaskAndVerify(polkadotApi, scheduler, keyringPair, taskID);
+beforeEach(() => {
+  jest.setTimeout(180000);
 });
 
 test('Cancel failed with incorrect format taskID', async () => {
   const nonexistentTaskID = "A string(<32 bytes).";
-  const keyringPair = getKeyringPair();
-  const scheduler = new Scheduler(OakChains.NEU);
 
+  const { scheduler, keyringPair } = await getContext();
+  await checkBalance(keyringPair);
+
+  // Cancel failed with incorrect format taskID
   await expect(scheduler.buildCancelTaskExtrinsic(keyringPair, nonexistentTaskID)).rejects.toBeInstanceOf(Error);
 });
 
 test('Cancel failed with nonexistent taskID', async () => {
   const nonexistentTaskID = "Please put a string of length greater than or equal to 32 bytes here, and make sure it is a non-existing taskID.";
-  const keyringPair = getKeyringPair();
-  const scheduler = new Scheduler(OakChains.NEU);
+  
+  const { scheduler, keyringPair } = await getContext();
+  await checkBalance(keyringPair);
 
   const cancelExtrinsicHex = await scheduler.buildCancelTaskExtrinsic(keyringPair, nonexistentTaskID);
-  await expect(sendExtrinsic(scheduler, cancelExtrinsicHex)).rejects.toThrow(`${sectionName}.TaskDoesNotExist`);
+  await expect(sendExtrinsic(scheduler, cancelExtrinsicHex)).rejects.toThrow(`${SECTION_NAME}.TaskDoesNotExist`);
 });
 
 test('Repeated cancellation of scheduleNotifyExtrinsic will fail.', async () => {
-  const { message, providedID, executionTimestamps, polkadotApi, scheduler, keyringPair } = await getNotifyExtrinsicParams();
+  const { scheduler, observer, keyringPair } = await getContext();
+  await checkBalance(keyringPair);
+  const extrinsicParams = getNotifyExtrinsicParams();
+  const { executionTimestamps } = extrinsicParams;
 
-  // Send notify extrinsic and get extrinsicHash, blockHash.
-  const extrinsicHex = await scheduler.buildScheduleNotifyExtrinsic(keyringPair, providedID, executionTimestamps, message);
-  await sendExtrinsic(scheduler, extrinsicHex);
+  // Send notify extrinsic
+  const taskID = await scheduleNotifyTaskAndVerify(scheduler, observer, keyringPair, extrinsicParams);
 
-  // Cancel task and verify
-  const taskID = (await scheduler.getTaskID(keyringPair.address, providedID)).toString();
-  await cancelTaskAndVerify(polkadotApi, scheduler, keyringPair, taskID);
-  await expect(cancelTaskAndVerify(polkadotApi, scheduler, keyringPair, taskID)).rejects.toThrow(`${sectionName}.TaskDoesNotExist`);
+  // Cancel task
+  await cancelTaskAndVerify(scheduler, observer, keyringPair, taskID, executionTimestamps[0]);
+
+  // Repeated cancellation of scheduleNotifyExtrinsic will fail.
+  const cancelExtrinsicHex = await scheduler.buildCancelTaskExtrinsic(keyringPair, taskID);
+  await expect(sendExtrinsic(scheduler, cancelExtrinsicHex)).rejects.toThrow(`${SECTION_NAME}.TaskDoesNotExist`);
+});
+
+test('Repeated cancellation of scheduleNativeTransferExtrinsic will fail.', async () => {
+  const { scheduler, observer, keyringPair } = await getContext();
+  await checkBalance(keyringPair);
+  const extrinsicParams = getNativeTransferExtrinsicParams();
+  const { executionTimestamps } = extrinsicParams;
+
+  // Send transfer extrinsic
+  const taskID = await scheduleNativeTransferAndVerify(scheduler, observer,  keyringPair, extrinsicParams);
+
+  // Cancel task
+  await cancelTaskAndVerify(scheduler, observer, keyringPair, taskID, executionTimestamps[0]);
+
+  // Repeated cancellation of scheduleNativeTransferExtrinsic will fail.
+  const cancelExtrinsicHex = await scheduler.buildCancelTaskExtrinsic(keyringPair, taskID);
+  await expect(sendExtrinsic(scheduler, cancelExtrinsicHex)).rejects.toThrow(`${SECTION_NAME}.TaskDoesNotExist`);
 });
