@@ -8,7 +8,9 @@
     "build": "tsc -b",
     "jest": "jest",
     "prettier": "prettier  --write src/**/*.ts",
-    "test": "npm run prettier && npm run build && npm run jest",
+    "test": "npm run prettier && npm run build && jest ./test/unit",
+    "test:functional": "npm run prettier && npm run build && jest --runInBand ./test/functional",
+    "test:all": "npm run test && npm run test:functional",
     "format": "eslint ./src --ext .ts --fix && prettier --write src/**/*.ts",
     "formatCheck": "eslint ./src --ext .ts && prettier --check src/**/*.ts"
   },

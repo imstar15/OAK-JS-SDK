@@ -1,6 +1,6 @@
-import { OakChains, OakChainSchedulingLimit, RECURRING_TASK_LIMIT } from '../src/constants'
-import { Recurrer } from '../src/recurrer'
-import { Scheduler } from '../src/scheduler'
+import { OakChains, OakChainSchedulingLimit, RECURRING_TASK_LIMIT } from '../../src/constants'
+import { Recurrer } from '../../src/recurrer'
+import { Scheduler } from '../../src/scheduler'
 
 test('validateTimestamps does not error with valid timestamps', async () => {
   const scheduler = new Scheduler(OakChains.NEU)

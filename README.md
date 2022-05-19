@@ -20,10 +20,24 @@ If more comprehensive documentation is required on how to use it, please visit o
 
 ## Test
 
-We need to to setup a SENDER_MNEMONIC environment variable for the test and ensure that there are enough tokens in this account (recommended the balance is greater than or equals to 30 UNIT).
+Run commands to test:
 
-Run command to test:
+**Unit test**
 
 ```
-SENDER_MNEMONIC="<SENDER_MNEMONIC>" node_modules/.bin/jest --runInBand
+npm run test
+```
+
+**Functional test**
+
+We need to to setup a SENDER_MNEMONIC environment variable for the test and ensure that there are enough tokens in this account (recommended the balance is greater than or equals to 30 UNIT).
+
+```
+SENDER_MNEMONIC="<SENDER_MNEMONIC>" npm run test:functional
+```
+
+**Test all**
+
+```
+SENDER_MNEMONIC="<SENDER_MNEMONIC>" npm run test:all
 ```
