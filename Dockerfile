@@ -6,4 +6,4 @@ COPY . /app
 
 RUN npm ci
 
-CMD [ "npm", "run", "test:all" ]
+CMD [ "npm", "run", "test" ]
