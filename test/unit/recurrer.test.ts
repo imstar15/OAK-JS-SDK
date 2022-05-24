@@ -1,5 +1,5 @@
 import * as _ from 'lodash'
-import { Recurrer } from '../src/recurrer'
+import { Recurrer } from '../../src/recurrer'
 
 test('getDailyRecurringTimestamps works with viable timestamps', async () => {
   const numberRecurring = 20
