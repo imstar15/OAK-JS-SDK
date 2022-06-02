@@ -1,0 +1,54 @@
+name: Integration Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  NODE_ENV: test
+
+jobs:
+  deploy:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    environment: test
+    
+    strategy:
+      matrix:
+        node-version: [14.17.0]
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v2
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+      
+    - name: Install dependencies
+      run: |
+          npm install
+          npm ci 
+
+    - name: Build
+      run: |
+          npm run build --if-present
+
+    - name: Test
+      run: |
+          npm run test
+
+    - name: Report Status
+      if: always()
+      uses: ravsamhq/notify-slack-action@master
+      with:
+        status: ${{ job.status }}
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
