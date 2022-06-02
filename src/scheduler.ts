@@ -78,7 +78,7 @@ export class Scheduler {
 
   /**
    * Default error handler for websockets updates for extrinsic
-   * @param result 
+   * @param result
    * @returns null
    */
   async defaultErrorHandler(result: ISubmittableResult): Promise<void> {
@@ -134,13 +134,13 @@ export class Scheduler {
    * validateTimestamps: validates timestamps. If not valid, will error.
    * If valid, nothing is returned. Called in buildScheduleNotifyExtrinsic
    * and buildScheduleNativeTransferExtrinsic.
-   * 
+   *
    * Timestamps must be:
    * 1. on the hour
    * 2. in a future time slot, but within a chain-dependent scheduling limit.
    * 3. limited to 24 time slots
-   * 
-   * @param timestamps 
+   *
+   * @param timestamps
    */
   validateTimestamps(timestamps: number[]): void {
     if (timestamps.length > RECURRING_TASK_LIMIT)
@@ -159,14 +159,14 @@ export class Scheduler {
   /**
    * validateTransferParams: validates Native Transfer params. If not valid, will error.
    * If valid, nothing is returned. Called in buildScheduleNativeTransferExtrinsic.
-   * 
+   *
    * Native Transfer Params:
    * 1. Must send a baseline amount of 1_000_000_000 plancks (0.1 NEU/TUR).
    * 2. The receiving address must not be the same as that of the sender.
-   * 
-   * @param amount 
-   * @param sendingAddress 
-   * @param receivingAddress 
+   *
+   * @param amount
+   * @param sendingAddress
+   * @param receivingAddress
    */
   validateTransferParams(amount: number, sendingAddress: AddressOrPair, receivingAddress: string): void {
     if (amount < LOWEST_TRANSFERRABLE_AMOUNT) throw new Error(`Amount too low`)
@@ -190,14 +190,14 @@ export class Scheduler {
     const polkadotApi = await this.getAPIClient()
     const txObject = polkadotApi.tx(extrinsicHex)
     const unsub = await txObject.send(async (result) => {
-      const { status } = result;
+      const { status } = result
       if (_.isNil(handleDispatch)) {
         await this.defaultErrorHandler(result)
       } else {
         await handleDispatch(result)
       }
       if (status.isFinalized) {
-        unsub();
+        unsub()
       }
     })
     return txObject.hash.toString()
@@ -208,12 +208,12 @@ export class Scheduler {
    * Function gets the next available nonce for user.
    * Therefore, will need to wait for transaction finalization before sending another.
    * Timestamps are converted into seconds if in milliseconds.
-   * 
+   *
    * Timestamps must be:
    * 1. on the hour
    * 2. in a future time slot, but within a chain-dependent scheduling limit.
    * 3. limited to 24 time slots
-   * 
+   *
    * @param address
    * @param providedID
    * @param timestamp
@@ -246,16 +246,16 @@ export class Scheduler {
    * Timestamps is an array of 1-24 unix timestamps, depending on recurrences needed.
    * ProvidedID needs to be a unique ID per wallet address.
    * Timestamps are converted into seconds if in milliseconds.
-   * 
+   *
    * Timestamps must be:
    * 1. on the hour
    * 2. in a future time slot, but within a chain-dependent scheduling limit.
    * 3. limited to 24 time slots
-   * 
+   *
    * Native Transfer Params:
    * 1. Must send a baseline amount of 1_000_000_000 plancks (0.1 NEU/TUR).
    * 2. The receiving address must not be the same as that of the sender.
-   * 
+   *
    * @param address
    * @param providedID
    * @param timestamp
@@ -289,7 +289,7 @@ export class Scheduler {
   }
 
   /**
-   * BuildCancelTaskExtrinsic: builds extrinsic as a hex string for cancelling a task. 
+   * BuildCancelTaskExtrinsic: builds extrinsic as a hex string for cancelling a task.
    * User must provide txHash for the task and wallet address used to schedule the task.
    * @param address
    * @param taskID

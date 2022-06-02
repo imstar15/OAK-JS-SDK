@@ -1,8 +1,8 @@
 interface AutomationTask {
   ownerId: string
   providedId: `0x${string}`
-  execution_times: number[],
-  executions_left: number,
+  execution_times: number[]
+  executions_left: number
   action: AutomationTaskNotifyAction | AutomationTaskTransferAction
 }
 
@@ -21,7 +21,7 @@ interface AutomationTaskTransferAction {
 }
 
 interface MissedTask {
-  task_id: string,
+  task_id: string
   execution_time: number
 }
 

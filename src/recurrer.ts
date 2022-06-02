@@ -6,9 +6,9 @@ import { ADDITIONAL_UNIT, DAYS_IN_WEEK, HOUR_IN_DAY, MIN_IN_HOUR, MS_IN_SEC, NO_
  * recurring tasks with a single blockchain extrinsic, rather than through multiple
  * extrinsic calls, as evidenced by the array of timestamps accepted in the Scheduler
  * class. This is currently only limited to 24 instances. These timstamps do not
- * have to be evenly spaced. It can be any timestamps in the future, on the hour, and 
- * limited to up to 24 occurences per extrinsic call. 
- * 
+ * have to be evenly spaced. It can be any timestamps in the future, on the hour, and
+ * limited to up to 24 occurences per extrinsic call.
+ *
  * This utility class will help generate timestamps on more regular cadences:
  * - Hourly
  * - Daily
@@ -107,7 +107,7 @@ export class Recurrer {
   }
 
   /**
-   * getMonthlyRecurringTimestampsByDate: Input starting timestamp in milliseconds 
+   * getMonthlyRecurringTimestampsByDate: Input starting timestamp in milliseconds
    * along with desired date of month and hour of day.
    * Output up to 6 monthly recurring timestamps in milliseconds.
    * If startTimestamp does not fit the hourOfDay or dateOfMonth requirements,
