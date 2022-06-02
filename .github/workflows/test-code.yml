@@ -44,11 +44,3 @@ jobs:
     - name: Test
       run: |
           npm run test
-
-    - name: Report Status
-      if: always()
-      uses: ravsamhq/notify-slack-action@master
-      with:
-        status: ${{ job.status }}
-      env:
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
