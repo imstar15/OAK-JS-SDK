@@ -36,7 +36,7 @@ class Recurrer {
         const startHour = startDate.getUTCHours();
         const startYear = startDate.getUTCFullYear();
         const startMonth = startDate.getUTCMonth();
-        const startDay = startHour <= hourOfDay ? startDate.getUTCDate() : startDate.getUTCDate() + constants_1.ADDITIONAL_UNIT;
+        const startDay = startHour < hourOfDay ? startDate.getUTCDate() : startDate.getUTCDate() + constants_1.ADDITIONAL_UNIT;
         const firstEventTimestamp = Date.UTC(startYear, startMonth, startDay, hourOfDay);
         const milliSecondsInDay = constants_1.HOUR_IN_DAY * constants_1.MIN_IN_HOUR * constants_1.SEC_IN_MIN * constants_1.MS_IN_SEC;
         return _.times(numberRecurring, (index) => {

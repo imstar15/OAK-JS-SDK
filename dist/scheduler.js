@@ -167,14 +167,17 @@ class Scheduler {
         const polkadotApi = await this.getAPIClient();
         const txObject = polkadotApi.tx(extrinsicHex);
         const unsub = await txObject.send(async (result) => {
+            const { status } = result;
             if (_.isNil(handleDispatch)) {
                 await this.defaultErrorHandler(result);
             }
             else {
                 await handleDispatch(result);
             }
+            if (status.isFinalized) {
+                unsub();
+            }
         });
-        unsub();
         return txObject.hash.toString();
     }
     /**
@@ -246,12 +249,12 @@ class Scheduler {
      * BuildCancelTaskExtrinsic: builds extrinsic as a hex string for cancelling a task.
      * User must provide txHash for the task and wallet address used to schedule the task.
      * @param address
-     * @param transactionHash
+     * @param taskID
      * @returns extrinsic hex, format: `0x${string}`
      */
-    async buildCancelTaskExtrinsic(address, transactionHash, signer) {
+    async buildCancelTaskExtrinsic(address, taskID, signer) {
         const polkadotApi = await this.getAPIClient();
-        const extrinsic = polkadotApi.tx['automationTime']['cancelTask'](transactionHash);
+        const extrinsic = polkadotApi.tx['automationTime']['cancelTask'](taskID);
         const signedExtrinsic = await extrinsic.signAsync(address, {
             signer,
             nonce: -1,

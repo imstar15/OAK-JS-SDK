@@ -12,7 +12,7 @@ import { OakChainWebsockets } from './constants'
  * - Task Queue
  * - Scheduled Task Map
  * - Task Map
- * 
+ *
  * The constructor takes the input to create an API client to connect to the blockchain.
  * Further commands are performed via this API client in order to reach the blockchain.
  * @param chain: OakChains ("NEU"/"TUR")
