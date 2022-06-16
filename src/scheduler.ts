@@ -161,7 +161,7 @@ export class Scheduler {
    * If valid, nothing is returned. Called in buildScheduleNativeTransferExtrinsic.
    *
    * Native Transfer Params:
-   * 1. Must send a baseline amount of 1_000_000_000 plancks (0.1 NEU/TUR).
+   * 1. Must send a baseline amount of 1_000_000_000 plancks (0.1 STUR/TUR).
    * 2. The receiving address must not be the same as that of the sender.
    *
    * @param amount
@@ -253,7 +253,7 @@ export class Scheduler {
    * 3. limited to 24 time slots
    *
    * Native Transfer Params:
-   * 1. Must send a baseline amount of 1_000_000_000 plancks (0.1 NEU/TUR).
+   * 1. Must send a baseline amount of 1_000_000_000 plancks (0.1 STUR/TUR).
    * 2. The receiving address must not be the same as that of the sender.
    *
    * @param address

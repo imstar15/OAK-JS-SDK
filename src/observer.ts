@@ -15,7 +15,7 @@ import { OakChainWebsockets } from './constants'
  *
  * The constructor takes the input to create an API client to connect to the blockchain.
  * Further commands are performed via this API client in order to reach the blockchain.
- * @param chain: OakChains ("NEU"/"TUR")
+ * @param chain: OakChains ("STUR"/"TUR")
  */
 export class Observer {
   wsProvider: WsProvider

@@ -10,16 +10,16 @@ export const LOWEST_TRANSFERRABLE_AMOUNT = 1000000000
 export const SS58_PREFIX = 51
 
 export enum OakChainWebsockets {
-  NEU = 'wss://rpc.testnet.oak.tech',
+  STUR = 'wss://rpc.turing-staging.oak.tech',
   TUR = 'wss://rpc.turing.oak.tech',
 }
 
 export enum OakChainSchedulingLimit {
-  NEU = 7 * 24 * 60 * 60 * 1000,
+  STUR = 6 * 30 * 24 * 60 * 60 * 1000,
   TUR = 6 * 30 * 24 * 60 * 60 * 1000,
 }
 
 export enum OakChains {
-  NEU = 'NEU',
+  STUR = 'STUR',
   TUR = 'TUR',
 }

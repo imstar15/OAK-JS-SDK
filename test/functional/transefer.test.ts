@@ -23,7 +23,7 @@ test('scheduler.buildScheduleNativeTransferExtrinsic will fail with duplicate pr
   await checkBalance(keyringPair);
   const extrinsicParams = getNativeTransferExtrinsicParams();
   const { executionTimestamps, providedID, receiverAddress, amount } = extrinsicParams;
-  
+
   // schedule notify task and verify
   await scheduleNativeTransferAndVerify(scheduler, observer, keyringPair, extrinsicParams);
 
@@ -47,7 +47,7 @@ test('scheduler.buildScheduleNativeTransferExtrinsic will fail with empty provid
   await checkBalance(keyringPair);
   const { amount, receiverAddress, executionTimestamps } = getNativeTransferExtrinsicParams();
   const providedID = null;
-  
+
   //scheduler.buildScheduleNativeTransferExtrinsic will fail with empty providedID
   const extrinsicHex = await scheduler.buildScheduleNativeTransferExtrinsic(keyringPair, providedID, executionTimestamps, receiverAddress, amount);
   await expect(sendExtrinsic(scheduler, extrinsicHex)).rejects.toThrow(`${SECTION_NAME}.EmptyProvidedId`);

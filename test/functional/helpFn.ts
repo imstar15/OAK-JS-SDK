@@ -61,7 +61,7 @@ export const hexToAscii = (hexStr: String, hasPrefix = false) => {
 }
 
 export const getPolkadotApi = async () : Promise<ApiPromise> => {
-  const wsProvider = new WsProvider(OakChainWebsockets[OakChains.NEU]);
+  const wsProvider = new WsProvider(OakChainWebsockets[OakChains.STUR]);
   const polkadotApi = await ApiPromise.create({
     provider: wsProvider,
     rpc: {
@@ -213,7 +213,7 @@ export const getNotifyExtrinsicParams = () => ({
 });
 
 export const getContext = async () => ({
-  scheduler: new Scheduler(OakChains.NEU),
-  observer: new Observer(OakChains.NEU),
+  scheduler: new Scheduler(OakChains.STUR),
+  observer: new Observer(OakChains.STUR),
   keyringPair: await getKeyringPair(),
 });

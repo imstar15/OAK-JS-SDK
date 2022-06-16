@@ -13,17 +13,17 @@ exports.LOWEST_TRANSFERRABLE_AMOUNT = 1000000000;
 exports.SS58_PREFIX = 51;
 var OakChainWebsockets;
 (function (OakChainWebsockets) {
-    OakChainWebsockets["NEU"] = "wss://rpc.testnet.oak.tech";
+    OakChainWebsockets["STUR"] = "wss://rpc.turing-staging.oak.tech";
     OakChainWebsockets["TUR"] = "wss://rpc.turing.oak.tech";
 })(OakChainWebsockets = exports.OakChainWebsockets || (exports.OakChainWebsockets = {}));
 var OakChainSchedulingLimit;
 (function (OakChainSchedulingLimit) {
-    OakChainSchedulingLimit[OakChainSchedulingLimit["NEU"] = 604800000] = "NEU";
+    OakChainSchedulingLimit[OakChainSchedulingLimit["STUR"] = 15552000000] = "STUR";
     OakChainSchedulingLimit[OakChainSchedulingLimit["TUR"] = 15552000000] = "TUR";
 })(OakChainSchedulingLimit = exports.OakChainSchedulingLimit || (exports.OakChainSchedulingLimit = {}));
 var OakChains;
 (function (OakChains) {
-    OakChains["NEU"] = "NEU";
+    OakChains["STUR"] = "STUR";
     OakChains["TUR"] = "TUR";
 })(OakChains = exports.OakChains || (exports.OakChains = {}));
 //# sourceMappingURL=constants.js.map

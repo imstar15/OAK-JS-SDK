@@ -87,6 +87,6 @@ type DateOfMonth =
 type WeekOfMonth = 1 | 2 | 3 | 4
 
 enum OakChains {
-  NEU = 'NEU',
+  STUR = 'STUR',
   TUR = 'TUR',
 }
