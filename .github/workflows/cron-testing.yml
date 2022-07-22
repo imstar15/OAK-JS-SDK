@@ -39,21 +39,21 @@ jobs:
         run: |
           npm run test:all
 
-  report-failure:
-    name: Report failure status
-    needs: [test]
-    if: failure()
+  # report-failure:
+  #   name: Report failure status
+  #   needs: [test]
+  #   if: failure()
 
-    runs-on: ubuntu-20.04
+  #   runs-on: ubuntu-20.04
 
-    steps:
-      - name: Check workflow status
-        id: check-workflow-status
-        uses: martialonline/workflow-status@v2
+  #   steps:
+  #     - name: Check workflow status
+  #       id: check-workflow-status
+  #       uses: martialonline/workflow-status@v2
 
-      - name: Report to slack
-        uses: ravsamhq/notify-slack-action@v1
-        with:
-          status: ${{ steps.check-workflow-status.outputs.status }}
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+  #     - name: Report to slack
+  #       uses: ravsamhq/notify-slack-action@v1
+  #       with:
+  #         status: ${{ steps.check-workflow-status.outputs.status }}
+  #       env:
+  #         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
