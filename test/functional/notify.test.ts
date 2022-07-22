@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { SECTION_NAME, sendExtrinsic, getNotifyExtrinsicParams, cancelTaskAndVerify, scheduleNotifyTaskAndVerify, getContext, checkBalance } from './helpFn';
 
 beforeEach(() => {
-  jest.setTimeout(120000);
+  jest.setTimeout(120000 * 3);
 });
 
 test('scheduler.buildScheduleNotifyExtrinsic works', async () => {

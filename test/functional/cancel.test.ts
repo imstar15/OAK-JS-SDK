@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { sendExtrinsic, getNativeTransferExtrinsicParams, getNotifyExtrinsicParams, cancelTaskAndVerify, SECTION_NAME, checkBalance, getContext, scheduleNotifyTaskAndVerify, scheduleNativeTransferAndVerify } from './helpFn';
 
 beforeEach(() => {
-  jest.setTimeout(180000);
+  jest.setTimeout(180000 * 3);
 });
 
 test('Cancel failed with incorrect format taskID', async () => {
