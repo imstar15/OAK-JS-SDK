@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { sendExtrinsic, SECTION_NAME, getNativeTransferExtrinsicParams, getContext, cancelTaskAndVerify, checkBalance, scheduleNativeTransferAndVerify } from './helpFn';
 
 beforeEach(() => {
-  jest.setTimeout(120000);
+  jest.setTimeout(120000 * 3);
 });
 
 test('scheduler.buildScheduleNativeTransferExtrinsic works', async () => {
